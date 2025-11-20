@@ -36,13 +36,22 @@ function App() {
   });
 
   const sortedFunds = [...filteredFunds].sort((a, b) => {
+    if (sortField === 'manager') {
+      const comparison = a.manager.localeCompare(b.manager);
+      return sortDirection === 'asc' ? comparison : -comparison;
+    }
     const diff = b[sortField] - a[sortField];
     return sortDirection === 'desc' ? diff : -diff;
   });
   const visibleFunds = sortedFunds.slice(0, visibleCount);
 
-  const handleSortToggle = () => {
-    setSortDirection(prev => prev === 'desc' ? 'asc' : 'desc');
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'desc' ? 'asc' : 'desc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc'); // Default to desc for new field
+    }
   };
 
   // Handle Escape key to close modals
@@ -169,13 +178,23 @@ function App() {
             <div className="grid grid-cols-12 items-center px-6 py-4 bg-[#111] text-xs font-medium text-text-muted uppercase tracking-wider border-b border-[#222]">
               <div className="col-span-1 text-center">#</div>
               <div className="col-span-5 pl-2">Fund</div>
-              <div className="col-span-3">Manager</div>
+              <div 
+                className="col-span-3 cursor-pointer hover:text-primary transition-colors flex items-center gap-1 group"
+                onClick={() => handleSort('manager')}
+              >
+                <span>Manager</span>
+                {sortField === 'manager' && (
+                  <span className="text-[10px] opacity-70">({sortDirection === 'asc' ? 'A-Z' : 'Z-A'})</span>
+                )}
+              </div>
               <div 
                 className="col-span-3 text-right pr-4 cursor-pointer hover:text-primary transition-colors flex items-center justify-end gap-1 group"
-                onClick={handleSortToggle}
+                onClick={() => handleSort(timePeriod === 'ytd' || timePeriod === 'last30Days' ? 'ytdReturn' : 'annualReturn')}
               >
                 <span>Returns</span>
-                <span className="text-[10px] opacity-70">({sortDirection === 'desc' ? '↓' : '↑'})</span>
+                {(sortField === 'annualReturn' || sortField === 'ytdReturn') && (
+                  <span className="text-[10px] opacity-70">({sortDirection === 'desc' ? '↓' : '↑'})</span>
+                )}
               </div>
             </div>
 
