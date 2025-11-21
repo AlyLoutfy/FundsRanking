@@ -1,14 +1,37 @@
 import React, { useState } from 'react';
-import { X, Send } from 'lucide-react';
+import { X, Megaphone, Mail, Phone, Send } from 'lucide-react';
+import clsx from 'clsx';
 
 const AdvertiseModal = ({ isOpen, onClose }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  
   const [formData, setFormData] = useState({
     companyName: '',
     email: '',
     message: ''
   });
 
-  if (!isOpen) return null;
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+      setIsClosing(false);
+    } else {
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  if (!isVisible && !isOpen) return null;
+
+  const handleClose = () => {
+    // Parent controls state, so we just call onClose
+    onClose();
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -21,11 +44,17 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-      onClick={onClose}
+      className={clsx(
+        "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm",
+        isClosing ? "animate-fadeOut" : "animate-fadeIn"
+      )}
+      onClick={handleClose}
     >
       <div 
-        className="bg-[#111] border border-[#222] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+        className={clsx(
+          "bg-surface border border-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl",
+          isClosing ? "animate-zoomOut" : "animate-zoomIn"
+        )}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 border-b border-[#222] flex items-center justify-between">

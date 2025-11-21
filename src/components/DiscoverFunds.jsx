@@ -69,8 +69,8 @@ const DiscoverFunds = ({ funds }) => {
           <div 
             key={fund.id}
             className={clsx(
-              "group relative rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg flex flex-col min-h-[120px] h-full hover:z-50",
-              fund.isSponsored ? "p-[1px] overflow-hidden" : "bg-[#111] border border-[#222] hover:border-primary/50 hover:shadow-primary/5"
+              "group relative rounded-xl transition-all duration-300 hover:shadow-lg flex flex-col min-h-[120px] h-full hover:z-50",
+              fund.isSponsored ? "p-[1px] overflow-hidden" : "bg-[#111] border border-[#222] hover:border-primary/50 hover:shadow-primary/5 hover:bg-[#1a1a1a]"
             )}
           >
             {/* Animated Border for Sponsored */}
