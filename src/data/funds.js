@@ -7,7 +7,11 @@ export const funds = [
     annualReturn: 26.5,
     ytdReturn: 18.2,
     category: "Equity",
-    risk: "High"
+    risk: "High",
+    description: "A premier equity fund targeting long-term capital appreciation through a diversified portfolio of high-growth Egyptian companies.",
+    strategy: "Invests primarily in top 50 EGX companies with strong fundamentals.",
+    minInvestment: "5,000 EGP",
+    fees: "1.5%"
   },
   {
     id: 2,
@@ -17,7 +21,11 @@ export const funds = [
     annualReturn: 25.8,
     ytdReturn: 17.9,
     category: "Equity",
-    risk: "High"
+    risk: "High",
+    description: "Focuses on achieving superior returns by investing in a mix of blue-chip and growth stocks in the Egyptian market.",
+    strategy: "Active management with a focus on sector rotation and stock selection.",
+    minInvestment: "10,000 EGP",
+    fees: "1.8%"
   },
   {
     id: 3,
@@ -27,7 +35,11 @@ export const funds = [
     annualReturn: 24.1,
     ytdReturn: 16.5,
     category: "Equity",
-    risk: "High"
+    risk: "High",
+    description: "Designed for aggressive growth, this fund leverages EFG Hermes' deep market insights to identify high-potential opportunities.",
+    strategy: "High-conviction equity portfolio.",
+    minInvestment: "2,500 EGP",
+    fees: "2.0%"
   },
   {
     id: 4,
@@ -37,7 +49,11 @@ export const funds = [
     annualReturn: 21.8,
     ytdReturn: 14.1,
     category: "Mixed",
-    risk: "Medium"
+    risk: "Medium",
+    description: "A balanced fund offering a mix of capital appreciation and income generation through equities and fixed income instruments.",
+    strategy: "60% Equities, 40% Fixed Income.",
+    minInvestment: "1,000 EGP",
+    fees: "1.2%"
   },
   {
     id: 5,
@@ -47,7 +63,11 @@ export const funds = [
     annualReturn: 19.2,
     ytdReturn: 13.5,
     category: "Islamic",
-    risk: "Medium"
+    risk: "Medium",
+    description: "Provides competitive returns while strictly adhering to Sharia principles, investing in compliant sectors.",
+    strategy: "Sharia-compliant equities and sukuk.",
+    minInvestment: "5,000 EGP",
+    fees: "1.0%"
   },
   {
     id: 6,
@@ -57,7 +77,11 @@ export const funds = [
     annualReturn: 18.5,
     ytdReturn: 12.8,
     category: "Equity",
-    risk: "High"
+    risk: "High",
+    description: "Seeks to outperform the benchmark by investing in a concentrated portfolio of market leaders.",
+    strategy: "Alpha generation through active stock picking.",
+    minInvestment: "10,000 EGP",
+    fees: "1.75%"
   },
   {
     id: 7,
@@ -67,7 +91,11 @@ export const funds = [
     annualReturn: 17.9,
     ytdReturn: 11.5,
     category: "Equity",
-    risk: "High"
+    risk: "High",
+    description: "A diversified equity fund aiming for long-term growth with a focus on financial and industrial sectors.",
+    strategy: "Diversified equity exposure.",
+    minInvestment: "1,000 EGP",
+    fees: "1.5%"
   },
   {
     id: 8,
@@ -77,7 +105,11 @@ export const funds = [
     annualReturn: 17.5,
     ytdReturn: 11.2,
     category: "Tech",
-    risk: "High"
+    risk: "High",
+    description: "Invests in technology and innovation-driven companies to capture the growth of the digital economy.",
+    strategy: "Tech and innovation focused.",
+    minInvestment: "500 EGP",
+    fees: "1.0%"
   },
   {
     id: 9,
@@ -87,7 +119,11 @@ export const funds = [
     annualReturn: 16.8,
     ytdReturn: 10.9,
     category: "Fixed Income",
-    risk: "Low"
+    risk: "Low",
+    description: "A low-risk fund designed to preserve capital and provide regular income through government securities.",
+    strategy: "Treasury bills and government bonds.",
+    minInvestment: "5,000 EGP",
+    fees: "0.5%"
   },
   {
     id: 10,
@@ -97,7 +133,11 @@ export const funds = [
     annualReturn: 16.2,
     ytdReturn: 10.5,
     category: "Growth",
-    risk: "Medium"
+    risk: "Medium",
+    description: "Balances growth and stability by investing in a mix of equities and fixed income instruments.",
+    strategy: "Balanced growth strategy.",
+    minInvestment: "2,000 EGP",
+    fees: "1.25%"
   },
   {
     id: 11,
@@ -107,7 +147,11 @@ export const funds = [
     annualReturn: 15.9,
     ytdReturn: 10.2,
     category: "Balanced",
-    risk: "Medium"
+    risk: "Medium",
+    description: "Aims to provide moderate capital growth with lower volatility than pure equity funds.",
+    strategy: "50% Equity, 50% Fixed Income.",
+    minInvestment: "5,000 EGP",
+    fees: "1.3%"
   },
   {
     id: 12,
@@ -117,7 +161,11 @@ export const funds = [
     annualReturn: 15.5,
     ytdReturn: 9.8,
     category: "Money Market",
-    risk: "Low"
+    risk: "Low",
+    description: "Ideal for short-term liquidity management, offering stable returns with very low risk.",
+    strategy: "Short-term money market instruments.",
+    minInvestment: "1,000 EGP",
+    fees: "0.4%"
   },
   {
     id: 13,
@@ -127,7 +175,11 @@ export const funds = [
     annualReturn: 14.8,
     ytdReturn: 9.5,
     category: "Islamic",
-    risk: "Low"
+    risk: "Low",
+    description: "A Sharia-compliant liquidity fund offering competitive returns for short-term savings.",
+    strategy: "Islamic money market instruments.",
+    minInvestment: "5,000 EGP",
+    fees: "0.6%"
   },
   {
     id: 14,
@@ -137,7 +189,11 @@ export const funds = [
     annualReturn: 14.2,
     ytdReturn: 9.1,
     category: "Fixed Income",
-    risk: "Low"
+    risk: "Low",
+    description: "Focuses on income generation through a diversified portfolio of corporate and government bonds.",
+    strategy: "Fixed income securities.",
+    minInvestment: "10,000 EGP",
+    fees: "0.7%"
   },
   {
     id: 15,
@@ -147,7 +203,11 @@ export const funds = [
     annualReturn: 13.9,
     ytdReturn: 8.8,
     category: "Money Market",
-    risk: "Low"
+    risk: "Low",
+    description: "A secure place for your savings with daily liquidity and attractive returns.",
+    strategy: "Daily liquidity money market.",
+    minInvestment: "500 EGP",
+    fees: "0.3%"
   }
 ];
 
@@ -188,6 +248,13 @@ for (let i = 16; i <= 100; i++) {
     annualReturn: parseFloat(annualReturn),
     ytdReturn: parseFloat(ytdReturn),
     category: type.category,
-    risk: type.risk
+    risk: type.risk,
+    description: `A professionally managed ${type.category.toLowerCase()} fund focusing on ${type.risk.toLowerCase()} risk investments to achieve stable returns.`,
+    strategy: type.category === "Equity" ? "Invests primarily in top 50 EGX companies." : 
+              type.category === "Fixed Income" ? "Invests in government bonds and treasury bills." :
+              type.category === "Islamic" ? "Sharia-compliant investments in various sectors." :
+              "Diversified portfolio across multiple asset classes.",
+    minInvestment: `${(Math.floor(Math.random() * 10) + 1) * 1000} EGP`,
+    fees: `${(Math.random() * 2 + 0.5).toFixed(1)}%`
   });
 }

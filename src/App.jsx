@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import FundRow from './components/FundRow';
 import SubmitFundModal from './components/SubmitFundModal';
 import { funds as initialFunds } from './data/funds';
+import DiscoverFunds from './components/DiscoverFunds';
 import { ArrowUpDown, Filter } from 'lucide-react';
 
 function App() {
@@ -86,6 +87,10 @@ function App() {
         onClose={() => setIsModalOpen(false)} 
         onSubmit={handleAddFund}
       />
+      
+      {/* Discover Section (Sponsored + New) */}
+      <DiscoverFunds funds={funds} />
+
       <div className="bg-[#111] border border-[#222] rounded-2xl overflow-hidden shadow-2xl">
         {/* Leaderboard Header */}
         <div className="flex flex-row items-start justify-between px-6 py-6 gap-4">

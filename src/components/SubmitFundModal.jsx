@@ -6,7 +6,11 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
     name: '',
     category: 'Equity',
     annualReturn: '',
-    risk: 'Medium'
+    risk: 'Medium',
+    description: '',
+    strategy: '',
+    minInvestment: '',
+    fees: ''
   });
 
   if (!isOpen) return null;
@@ -15,7 +19,16 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
     e.preventDefault();
     onSubmit(formData);
     onClose();
-    setFormData({ name: '', category: 'Equity', annualReturn: '', risk: 'Medium' });
+    setFormData({ 
+      name: '', 
+      category: 'Equity', 
+      annualReturn: '', 
+      risk: 'Medium',
+      description: '',
+      strategy: '',
+      minInvestment: '',
+      fees: ''
+    });
   };
 
   return (
@@ -24,10 +37,10 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
       onClick={onClose}
     >
       <div 
-        className="bg-surface border border-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+        className="bg-surface border border-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-border flex items-center justify-between">
+        <div className="p-6 border-b border-border flex items-center justify-between sticky top-0 bg-surface z-10">
           <h3 className="text-xl font-bold text-white">Submit a Fund</h3>
           <button onClick={onClose} className="text-text-muted hover:text-white transition-colors">
             <X className="w-6 h-6" />
@@ -50,6 +63,16 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
               placeholder="e.g. CIB Growth Fund"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-muted mb-1">Description</label>
+            <textarea
+              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:border-primary outline-none transition-colors min-h-[80px]"
+              placeholder="Brief description of the fund..."
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
 
@@ -79,6 +102,40 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
               </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-text-muted mb-1">Strategy</label>
+            <input
+              type="text"
+              className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:border-primary outline-none transition-colors"
+              placeholder="e.g. Long-term capital appreciation"
+              value={formData.strategy}
+              onChange={(e) => setFormData({ ...formData, strategy: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-text-muted mb-1">Min Investment</label>
+              <input
+                type="text"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:border-primary outline-none transition-colors"
+                placeholder="e.g. 10,000 EGP"
+                value={formData.minInvestment}
+                onChange={(e) => setFormData({ ...formData, minInvestment: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-text-muted mb-1">Fees</label>
+              <input
+                type="text"
+                className="w-full bg-background border border-border rounded-lg px-4 py-2 text-white focus:border-primary outline-none transition-colors"
+                placeholder="e.g. 1.5%"
+                value={formData.fees}
+                onChange={(e) => setFormData({ ...formData, fees: e.target.value })}
+              />
             </div>
           </div>
 
