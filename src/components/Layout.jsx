@@ -75,7 +75,7 @@ const Layout = ({ children, searchTerm, onSearchChange, onOpenSubmitModal }) => 
               </div>
               
               <p className="text-text-muted text-sm md:text-xl max-w-xl mb-8 font-light">
-                The database of verified mutual fund returns in Egypt.
+                The database of verified mutual fund returns in Egypt. <span style={{ color: 'red' }}>(Dummy Data)</span>
               </p>
 
               <div className="flex items-center gap-2 w-full max-w-lg">
@@ -107,7 +107,25 @@ const Layout = ({ children, searchTerm, onSearchChange, onOpenSubmitModal }) => 
 
             {/* Footer */}
             <footer className="border-t border-border mt-12 py-8 text-center text-text-muted text-sm">
-              <p>&copy; 2025 FundsRank Egypt. All rights reserved.</p>
+              <div className="max-w-4xl mx-auto space-y-3 px-4">
+                <div className="text-xs leading-relaxed opacity-60">
+                  <p className="mb-2">
+                    This website is a prototype/demonstration project and is not a live, production service. 
+                    All data displayed, including fund names, returns, and performance metrics, is dummy data created 
+                    for demonstration purposes only and does not represent real mutual fund information.
+                  </p>
+                  <p className="mb-2">
+                    All logos, trademarks, and brand names displayed on this website are the property of their respective owners 
+                    and are used here solely for demonstration purposes. Their use does not imply any affiliation, endorsement, 
+                    or partnership with this project. No actual customers or clients are represented on this website.
+                  </p>
+                  <p>
+                    This website is provided "as is" without any warranties or guarantees. The creator assumes no liability 
+                    for any decisions made based on the information presented here. This is not financial advice.
+                  </p>
+                </div>
+                <p>&copy; 2025 FundsRank Egypt. All rights reserved.</p>
+              </div>
             </footer>
           </div>
 
