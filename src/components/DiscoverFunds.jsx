@@ -1,9 +1,8 @@
 import React from 'react';
-import { Compass, Sparkles } from 'lucide-react';
-import FundDetailsPopover from './FundDetailsPopover';
+import { Compass, Info } from 'lucide-react';
 import clsx from 'clsx';
 
-const DiscoverFunds = ({ funds }) => {
+const DiscoverFunds = ({ funds, onFundClick }) => {
   // Mock sponsored funds data
   const sponsoredFunds = [
     {
@@ -60,39 +59,48 @@ const DiscoverFunds = ({ funds }) => {
           <div className="p-1.5 bg-primary/10 rounded-lg">
             <Compass className="w-5 h-5 text-primary" />
           </div>
-          <h2 className="text-lg font-bold text-white font-display">Discover</h2>
+          <h2 className="text-lg font-bold text-white font-display">Featured Funds</h2>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {allFunds.map((fund) => (
-          <div 
-            key={fund.id}
-            className={clsx(
-              "group relative rounded-xl transition-all duration-300 hover:shadow-lg flex flex-col min-h-[120px] h-full hover:z-50",
-              fund.isSponsored ? "p-[1px] overflow-hidden" : "bg-[#111] border border-[#222] hover:border-primary/50 hover:shadow-primary/5 hover:bg-[#1a1a1a]"
-            )}
-          >
-            {/* Animated Border for Sponsored */}
-            {fund.isSponsored && (
-              <div className="absolute inset-[-100%] animate-[spin_8s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#EAB308_0%,#000000_50%,#EAB308_100%)] opacity-100" />
-            )}
-
-            {/* Card Content Container */}
-            <div className={clsx(
-              "relative h-full flex flex-col rounded-xl p-4",
-              fund.isSponsored ? "bg-[#111]" : ""
-            )}>
-              {/* Info Icon (Absolute Top Right) */}
-              <div className="absolute top-2 right-2 z-10">
-                <FundDetailsPopover 
-                  fund={fund} 
-                  badge={fund.isSponsored ? 'promoted' : 'new'} 
-                />
+        {allFunds.map((fund, index) => (
+          <div key={fund.id} className="relative group pt-4"> {/* Added more top padding for external badges */}
+            
+            {/* Tab Style Label for All Cards */}
+            {(fund.isSponsored || fund.isNew) && (
+              <div className="absolute -top-[1px] right-4 z-20">
+                <div className={clsx(
+                  "px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-t-lg border-t border-x shadow-lg",
+                  fund.isSponsored 
+                    ? "bg-[#111] text-yellow-400 border-yellow-500/30 shadow-yellow-500/5" 
+                    : "bg-[#111] text-blue-400 border-blue-500/30 shadow-blue-500/5"
+                )}>
+                  {fund.isSponsored ? "Promoted" : "New"}
+                </div>
               </div>
+            )}
 
-              {/* Content Row: Logo & Name */}
-              <div className="flex items-start gap-3 mb-2 flex-1 pr-6">
+            <div 
+              onClick={() => onFundClick(fund)}
+              className={clsx(
+                "relative rounded-xl transition-all duration-300 hover:shadow-lg flex flex-col min-h-[120px] h-full hover:z-10 cursor-pointer overflow-hidden",
+                fund.isSponsored ? "p-[1px]" : "bg-[#111] border border-[#222] hover:border-primary/50 hover:shadow-primary/5 hover:bg-[#1a1a1a]"
+              )}
+            >
+              {/* Animated Border for Sponsored */}
+              {fund.isSponsored && (
+                <div className="absolute inset-[-100%] animate-[spin_8s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#EAB308_0%,#000000_50%,#EAB308_100%)] opacity-100" />
+              )}
+  
+              {/* Card Content Container */}
+              <div className={clsx(
+                "relative h-full flex flex-col rounded-xl p-4",
+                fund.isSponsored ? "bg-[#111]" : ""
+              )}>
+  
+                {/* Content Row: Logo & Name */}
+                <div className="flex items-start gap-3 mb-2 flex-1">
                 <img 
                   src={fund.logo} 
                   alt={fund.manager} 
@@ -133,7 +141,9 @@ const DiscoverFunds = ({ funds }) => {
                   </div>
               </div>
             </div>
+            </div>
           </div>
+
         ))}
       </div>
     </div>

@@ -254,7 +254,7 @@ for (let i = 16; i <= 100; i++) {
               type.category === "Fixed Income" ? "Invests in government bonds and treasury bills." :
               type.category === "Islamic" ? "Sharia-compliant investments in various sectors." :
               "Diversified portfolio across multiple asset classes.",
-    minInvestment: `${(Math.floor(Math.random() * 10) + 1) * 1000} EGP`,
+    minInvestment: `${((Math.floor(Math.random() * 10) + 1) * 1000).toLocaleString()} EGP`,
     fees: `${(Math.random() * 2 + 0.5).toFixed(1)}%`
   });
 }

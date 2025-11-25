@@ -53,14 +53,17 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
       <div 
         className={clsx(
           "bg-surface border border-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl",
-          isClosing ? "animate-zoomOut" : "animate-zoomIn"
+          isClosing ? "animate-scaleOut" : "animate-scaleIn"
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-[#222] flex items-center justify-between">
-          <h3 className="text-xl font-bold text-white font-display">Advertise on FundsRank</h3>
-          <button onClick={onClose} className="text-text-muted hover:text-white transition-colors">
-            <X className="w-6 h-6" />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#333] bg-[#1a1a1a]">
+          <h3 className="text-lg font-bold text-white font-display">Advertise on FundsRank</h3>
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-[#333] rounded-full transition-colors text-text-muted hover:text-white"
+          >
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -77,7 +80,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
               <span className="text-sm font-medium text-white">Available Slots This Month</span>
             </div>
-            <span className="text-lg font-bold text-primary">3 Left</span>
+            <span className="text-lg font-bold text-primary">4 Left</span>
           </div>
 
           {/* Pricing Card */}

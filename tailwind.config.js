@@ -17,9 +17,10 @@ export default {
         border: "#27272a",
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Space Grotesk', 'sans-serif'],
         display: ['Space Grotesk', 'sans-serif'],
         mono: ['Inconsolata', 'monospace'],
+        inter: ['Inter', 'sans-serif'],
       },
       animation: {
         scroll: 'scroll 20s linear infinite',

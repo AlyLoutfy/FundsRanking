@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout';
 import FundRow from './components/FundRow';
 import SubmitFundModal from './components/SubmitFundModal';
+import FundDetailsModal from './components/FundDetailsModal';
 import { funds as initialFunds } from './data/funds';
 import DiscoverFunds from './components/DiscoverFunds';
 import { ArrowUpDown, Filter } from 'lucide-react';
@@ -10,6 +11,7 @@ function App() {
   const [funds, setFunds] = useState(initialFunds);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFund, setSelectedFund] = useState(null);
   const [visibleCount, setVisibleCount] = useState(50);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [riskFilter, setRiskFilter] = useState('all');
@@ -60,6 +62,7 @@ function App() {
     const handleEsc = (e) => {
       if (e.key === 'Escape') {
         setIsModalOpen(false);
+        setSelectedFund(null);
       }
     };
     window.addEventListener('keydown', handleEsc);
@@ -87,9 +90,16 @@ function App() {
         onClose={() => setIsModalOpen(false)} 
         onSubmit={handleAddFund}
       />
+
+      <FundDetailsModal 
+        isOpen={!!selectedFund}
+        onClose={() => setSelectedFund(null)}
+        fund={selectedFund}
+        allFunds={funds}
+      />
       
       {/* Discover Section (Sponsored + New) */}
-      <DiscoverFunds funds={funds} />
+      <DiscoverFunds funds={funds} onFundClick={setSelectedFund} />
 
       <div className="bg-[#111] border border-[#222] rounded-2xl overflow-hidden shadow-2xl">
         {/* Leaderboard Header */}
@@ -179,8 +189,8 @@ function App() {
 
         {/* Table Header */}
         <div className="overflow-x-auto">
-          <div className="min-w-[900px]">
-            <div className="grid grid-cols-12 items-center px-6 py-4 bg-[#111] text-xs font-medium text-text-muted uppercase tracking-wider border-b border-[#222]">
+          <div className="w-full">
+            <div className="hidden md:grid grid-cols-12 items-center px-6 py-4 bg-[#111] text-xs font-medium text-text-muted uppercase tracking-wider border-b border-[#222]">
               <div className="col-span-1 text-center">#</div>
               <div className="col-span-5 pl-2">Fund</div>
               <div 
@@ -206,7 +216,12 @@ function App() {
             {/* List */}
             <div className="divide-y divide-[#222]">
               {visibleFunds.map((fund, index) => (
-                <FundRow key={fund.id} rank={index + 1} fund={fund} />
+                <FundRow 
+                  key={fund.id} 
+                  rank={index + 1} 
+                  fund={fund} 
+                  onClick={() => setSelectedFund(fund)}
+                />
               ))}
             </div>
           </div>

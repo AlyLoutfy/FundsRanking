@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
 import { Search, Plus, Megaphone } from 'lucide-react';
+import clsx from 'clsx';
 import AdSpace from './AdSpace';
 import AdvertiseModal from './AdvertiseModal';
 import cibLogo from '../assets/cib.png';
 
 const Layout = ({ children, searchTerm, onSearchChange, onOpenSubmitModal }) => {
   const [isAdvertiseModalOpen, setIsAdvertiseModalOpen] = useState(false);
+  const [startMarquee, setStartMarquee] = useState(false);
 
   const CIB_AD_TEXT = "Delivering value to our clients, our community and our shareholders";
+
+  // Start marquee after 3 seconds
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setStartMarquee(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Handle Escape key
   React.useEffect(() => {
@@ -33,7 +43,10 @@ const Layout = ({ children, searchTerm, onSearchChange, onOpenSubmitModal }) => 
             We use w-max to let it expand based on content. 
             We have 2 sets of items. Animation moves from -50% (start of 2nd set) to 0% (start of 1st set).
         */}
-        <div className="flex items-center gap-3 animate-marquee-left whitespace-nowrap absolute left-0 w-max hover:pause">
+        <div className={clsx(
+          "flex items-center gap-3 whitespace-nowrap absolute left-0 w-max hover:pause pl-4",
+          startMarquee ? "animate-marquee-left" : ""
+        )}>
           {/* Set 1 */}
           <div className="inline-flex items-center gap-2 px-4 h-10 bg-background border border-border rounded-lg text-xs text-text-muted font-medium shrink-0">
             <img src={cibLogo} alt="CIB" className="h-6 w-auto object-contain" />
@@ -66,10 +79,10 @@ const Layout = ({ children, searchTerm, onSearchChange, onOpenSubmitModal }) => 
             {/* Header Section */}
             <div className="flex flex-col items-center justify-center pt-8 pb-8 px-4 text-center">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary/20">
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg shadow-primary/20">
                   F
                 </div>
-                <h1 className="text-2xl md:text-4xl font-bold font-display text-white tracking-tight">
+                <h1 className="text-xl md:text-4xl font-bold font-display text-white tracking-tight">
                   FundsRank
                 </h1>
               </div>

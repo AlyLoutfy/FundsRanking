@@ -73,9 +73,12 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-4 border-b border-border flex items-center justify-between bg-surface z-10 shrink-0">
-          <h3 className="text-lg font-bold text-white">Submit a Fund</h3>
-          <button onClick={onClose} className="text-text-muted hover:text-white transition-colors">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#333] bg-[#1a1a1a]">
+          <h3 className="text-lg font-bold text-white font-display">Submit a Fund</h3>
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-[#333] rounded-full transition-colors text-text-muted hover:text-white"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
