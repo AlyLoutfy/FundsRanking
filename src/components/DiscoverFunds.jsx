@@ -11,6 +11,7 @@ const DiscoverFunds = ({ funds, onFundClick }) => {
       manager: "Goldman Sachs",
       logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Goldman_Sachs.svg/1200px-Goldman_Sachs.svg.png",
       annualReturn: 28.4,
+      ytdReturn: 12.3,
       category: "Equity",
       risk: "High",
       description: "Exclusive access to top-tier Egyptian equities managed by global experts.",
@@ -69,12 +70,12 @@ const DiscoverFunds = ({ funds, onFundClick }) => {
             
             {/* Tab Style Label for All Cards */}
             {(fund.isSponsored || fund.isNew) && (
-              <div className="absolute -top-[1px] right-4 z-20">
+              <div className="absolute -top-[1.5px] right-4 z-20">
                 <div className={clsx(
                   "px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-t-lg border-t border-x shadow-lg",
                   fund.isSponsored 
                     ? "bg-[#111] text-yellow-400 border-yellow-500/30 shadow-yellow-500/5" 
-                    : "bg-[#111] text-blue-400 border-blue-500/30 shadow-blue-500/5"
+                    : "bg-[#111] text-blue-400 border-blue-500/50 shadow-blue-500/5"
                 )}>
                   {fund.isSponsored ? "Promoted" : "New"}
                 </div>

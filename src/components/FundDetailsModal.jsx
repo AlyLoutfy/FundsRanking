@@ -160,7 +160,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
       <img 
         src={fund.logo} 
         alt={fund.name} 
-        className="w-16 h-16 rounded-xl object-contain bg-white p-1 shadow-lg shrink-0"
+        className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-contain bg-white p-1 shadow-lg shrink-0"
         onError={(e) => {
           e.target.onerror = null; 
           e.target.src = `https://ui-avatars.com/api/?name=${fund.manager}&background=random&color=fff&size=64`;
@@ -168,7 +168,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <h2 className="text-xl font-bold text-white leading-tight line-clamp-2">{fund.name}</h2>
+          <h2 className="text-lg md:text-xl font-bold text-white leading-tight line-clamp-2">{fund.name}</h2>
         </div>
         <p className="text-primary font-medium text-sm mb-2">{fund.manager}</p>
         <div className="flex flex-wrap gap-2">
@@ -277,7 +277,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
       <div className={clsx(
         "relative bg-[#161616] border border-[#333] shadow-2xl w-full flex flex-col overflow-hidden transition-all duration-300",
         // Mobile: full width, rounded top, max-height, slide animation
-        "max-h-[95vh] rounded-t-2xl md:rounded-2xl md:max-h-[90vh]",
+        "max-h-[80vh] rounded-t-2xl md:rounded-2xl md:max-h-[90vh]",
         // Desktop: max-width based on comparison mode
         showRightColumn ? "md:max-w-5xl" : "md:max-w-xl",
         // Conditional animations: drawer on mobile, sleek on desktop (matches SubmitFundModal)
@@ -346,7 +346,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
                           type="text" 
                           autoFocus
                           placeholder="Search funds..." 
-                          className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:border-primary outline-none transition-colors shadow-sm"
+                          className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg py-2 pl-9 pr-4 text-base md:text-sm text-white focus:border-primary outline-none transition-colors shadow-sm"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                         />
