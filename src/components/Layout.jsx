@@ -34,7 +34,7 @@ const Layout = ({ children, onOpenSubmitModal }) => {
     <div className="min-h-screen bg-background text-text font-sans selection:bg-primary/30 relative">
       {/* Version Number - Desktop */}
       <div className="hidden lg:block absolute top-2 left-2 text-[10px] text-text-muted/40 font-mono pointer-events-none z-50">
-        v 1.1.0
+        v 1.1.1
       </div>
       <AdvertiseModal 
         isOpen={isAdvertiseModalOpen} 
@@ -78,7 +78,7 @@ const Layout = ({ children, onOpenSubmitModal }) => {
 
       {/* Version Number - Mobile */}
       <div className="lg:hidden text-left text-[9px] text-text-muted/40 font-mono px-4 pt-2 pb-0">
-        v 1.1.0
+        v 1.1.1
       </div>
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">

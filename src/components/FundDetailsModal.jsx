@@ -170,8 +170,8 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
         <div className="flex items-center gap-2 mb-1">
           <h2 className="text-lg md:text-xl font-bold text-white leading-tight line-clamp-2">{fund.name}</h2>
         </div>
-        <p className="text-primary font-medium text-sm mb-2">{fund.manager}</p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2 mt-1">
+          <p className="text-primary font-medium text-sm">{fund.manager}</p>
           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#222] text-text-muted border border-[#333] uppercase tracking-wider">
             {fund.category}
           </span>
@@ -275,7 +275,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
       />
 
       <div className={clsx(
-        "relative bg-[#161616] border border-[#333] shadow-2xl w-full flex flex-col overflow-hidden transition-all duration-300",
+        "relative bg-[#161616] md:border md:border-[#333] shadow-2xl w-full flex flex-col overflow-hidden transition-all duration-300",
         // Mobile: full width, rounded top, max-height, slide animation
         "max-h-[90vh] rounded-t-2xl md:rounded-2xl md:max-h-[90vh]",
         // Desktop: max-width based on comparison mode

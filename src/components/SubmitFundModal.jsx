@@ -90,7 +90,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
     >
       <div 
         className={clsx(
-          "bg-surface border-t md:border border-border rounded-t-2xl md:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col",
+          "bg-surface md:border border-border rounded-t-2xl md:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col",
           isClosing 
             ? "animate-drawerClose md:animate-sleekClose" 
             : "animate-drawerOpen md:animate-sleekOpen"
