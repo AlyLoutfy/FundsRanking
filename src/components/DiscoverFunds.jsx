@@ -61,12 +61,15 @@ const DiscoverFunds = ({ funds, onFundClick }) => {
             <Compass className="w-5 h-5 text-primary" />
           </div>
           <h2 className="text-lg font-bold text-white font-display">Featured Funds</h2>
+          <span className="md:hidden text-[10px] font-medium text-primary/80 animate-pulse ml-auto">
+            Swipe &rarr;
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="flex overflow-x-auto pb-4 pt-1 gap-4 snap-x snap-mandatory md:grid md:grid-cols-5 md:overflow-visible md:pb-0 md:pt-0 scrollbar-styled md:mx-0 md:px-0">
         {allFunds.map((fund, index) => (
-          <div key={fund.id} className="relative group pt-4"> {/* Added more top padding for external badges */}
+          <div key={fund.id} className="relative group pt-4 min-w-[280px] md:min-w-0 snap-center first:pl-2 last:pr-2 md:first:pl-0 md:last:pr-0"> {/* Added more top padding for external badges */}
             
             {/* Tab Style Label for All Cards */}
             {(fund.isSponsored || fund.isNew) && (

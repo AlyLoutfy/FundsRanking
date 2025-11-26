@@ -101,42 +101,26 @@ function App() {
 
       <div className="bg-[#111] border border-[#222] rounded-2xl overflow-hidden shadow-2xl">
         {/* Leaderboard Header */}
-        {/* Leaderboard Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between px-6 py-6 gap-4">
-          
-          {/* Top Row: Title + Mobile Filter Toggle */}
-          <div className="flex items-center justify-between w-full md:w-auto">
-            <h2 className="text-xl font-bold text-white font-display pt-1">Leaderboard</h2>
-            
-            {/* Mobile Filter Toggle */}
-            <button 
-              onClick={() => setShowMobileFilters(!showMobileFilters)}
-              className="md:hidden flex items-center gap-2 px-3 py-1.5 bg-[#1a1a1a] border border-[#333] rounded-lg text-xs md:text-sm font-medium text-white hover:bg-[#222] transition-colors"
-            >
-              <Filter className="w-3 h-3 md:w-4 md:h-4" />
-              <span>Filters</span>
-              {(timePeriod !== 'all' || categoryFilter !== 'all' || riskFilter !== 'all') && (
-                <span className="flex h-2 w-2 rounded-full bg-primary ml-1"></span>
-              )}
-            </button>
-          </div>
-
-          {/* Search & Desktop Filters */}
-          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto md:items-center">
-            {/* Search Bar */}
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-              <input 
-                type="text" 
-                placeholder="Search funds..." 
-                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:border-primary outline-none transition-colors"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+        <div className="px-6 py-6">
+          {/* Desktop: Single Row with Title + Search on Left, Filters on Right */}
+          <div className="hidden md:flex items-center justify-between gap-4">
+            {/* Left: Title + Search */}
+            <div className="flex items-center gap-4">
+              <h2 className="text-xl font-bold text-white font-display pt-1">Leaderboard</h2>
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <input 
+                  type="text" 
+                  placeholder="Search funds..." 
+                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:border-primary outline-none transition-colors"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
 
-            {/* Desktop Filter Controls */}
-            <div className="hidden md:flex flex-row gap-3">
+            {/* Right: Filter Controls */}
+            <div className="flex flex-row gap-3">
               {/* Time Period Filter */}
               <div className="relative group">
                 <select 
@@ -200,6 +184,36 @@ function App() {
               </div>
             </div>
           </div>
+
+          {/* Mobile: Stacked Layout */}
+          <div className="md:hidden">
+            {/* Title + Filter Toggle */}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white font-display pt-1">Leaderboard</h2>
+              <button 
+                onClick={() => setShowMobileFilters(!showMobileFilters)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-[#1a1a1a] border border-[#333] rounded-lg text-xs font-medium text-white hover:bg-[#222] transition-colors"
+              >
+                <Filter className="w-3 h-3" />
+                <span>Filters</span>
+                {(timePeriod !== 'all' || categoryFilter !== 'all' || riskFilter !== 'all') && (
+                  <span className="flex h-2 w-2 rounded-full bg-primary ml-1"></span>
+                )}
+              </button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <input 
+                type="text" 
+                placeholder="Search funds..." 
+                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg py-1.5 pl-9 pr-4 text-sm text-white focus:border-primary outline-none transition-colors"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Mobile Filter Controls (Expanded) */}
@@ -209,7 +223,7 @@ function App() {
             <select 
               value={timePeriod}
               onChange={(e) => setTimePeriod(e.target.value)}
-              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full"
+              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-1.5 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full"
             >
               <option value="all">All Time</option>
               <option value="ytd">YTD</option>
@@ -228,7 +242,7 @@ function App() {
             <select 
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full"
+              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-1.5 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full"
             >
               <option value="all">All Categories</option>
               <option value="Equity">Equity</option>
@@ -252,7 +266,7 @@ function App() {
             <select 
               value={riskFilter}
               onChange={(e) => setRiskFilter(e.target.value)}
-              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full"
+              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-1.5 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full"
             >
               <option value="all">All Risk Levels</option>
               <option value="Low">Low Risk</option>

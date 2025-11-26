@@ -83,13 +83,13 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#333] bg-[#1a1a1a]">
-          <h3 className="text-lg font-bold text-white font-display">Advertise on FundsRank</h3>
+        <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a]">
+          <h3 className="text-base md:text-lg font-bold text-white font-display">Advertise on FundsRank</h3>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-[#333] rounded-full transition-colors text-text-muted hover:text-white"
+            className="p-1.5 md:p-2 hover:bg-[#333] rounded-full transition-colors text-text-muted hover:text-white"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
 

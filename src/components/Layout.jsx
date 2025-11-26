@@ -32,9 +32,9 @@ const Layout = ({ children, onOpenSubmitModal }) => {
 
   return (
     <div className="min-h-screen bg-background text-text font-sans selection:bg-primary/30 relative">
-      {/* Version Number */}
-      <div className="absolute top-2 left-2 text-[10px] text-text-muted/30 font-mono pointer-events-none z-50">
-        v1.0.3
+      {/* Version Number - Desktop */}
+      <div className="hidden lg:block absolute top-2 left-2 text-[10px] text-text-muted/40 font-mono pointer-events-none z-50">
+        v 1.1.0
       </div>
       <AdvertiseModal 
         isOpen={isAdvertiseModalOpen} 
@@ -76,6 +76,11 @@ const Layout = ({ children, onOpenSubmitModal }) => {
         </div>
       </div>
 
+      {/* Version Number - Mobile */}
+      <div className="lg:hidden text-left text-[9px] text-text-muted/40 font-mono px-4 pt-2 pb-0">
+        v 1.1.0
+      </div>
+
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Header + Leaderboard */}
@@ -83,7 +88,7 @@ const Layout = ({ children, onOpenSubmitModal }) => {
             {/* Header Section */}
             {/* Header Section */}
             {/* Header Section */}
-            <div className="flex flex-col items-start pt-4 pb-12 md:pt-8 md:pb-8">
+            <div className="flex flex-col items-start pt-1 pb-12 md:pt-8 md:pb-8">
               {/* Top Row: Logo/Title + Add Fund Button */}
               <div className="flex flex-row items-center justify-between w-full mb-4">
                 {/* Logo & Title */}
@@ -137,7 +142,6 @@ const Layout = ({ children, onOpenSubmitModal }) => {
                   </p>
                 </div>
                 
-                {/* Mobile Advertise Button */}
                 <button 
                   onClick={() => setIsAdvertiseModalOpen(true)}
                   className="lg:hidden flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm mx-auto"

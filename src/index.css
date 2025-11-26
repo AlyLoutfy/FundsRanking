@@ -12,6 +12,7 @@
 /* Custom scrollbar for a premium feel */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -24,6 +25,23 @@
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-surface-hover;
+}
+
+/* Custom scrollbar for featured funds carousel on mobile */
+.scrollbar-styled::-webkit-scrollbar {
+  height: 7px;
+}
+
+.scrollbar-styled::-webkit-scrollbar-track {
+  @apply bg-[#222] rounded-full mx-2;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb {
+  @apply bg-primary rounded-full;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary brightness-110;
 }
 
 @keyframes marquee-left {
