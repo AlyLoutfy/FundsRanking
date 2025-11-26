@@ -277,7 +277,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
       <div className={clsx(
         "relative bg-[#161616] border border-[#333] shadow-2xl w-full flex flex-col overflow-hidden transition-all duration-300",
         // Mobile: full width, rounded top, max-height, slide animation
-        "max-h-[80vh] rounded-t-2xl md:rounded-2xl md:max-h-[90vh]",
+        "max-h-[90vh] rounded-t-2xl md:rounded-2xl md:max-h-[90vh]",
         // Desktop: max-width based on comparison mode
         showRightColumn ? "md:max-w-5xl" : "md:max-w-xl",
         // Conditional animations: drawer on mobile, sleek on desktop (matches SubmitFundModal)
