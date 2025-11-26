@@ -5,7 +5,7 @@ import AdSpace from './AdSpace';
 import AdvertiseModal from './AdvertiseModal';
 import cibLogo from '../assets/cib.png';
 
-const Layout = ({ children, searchTerm, onSearchChange, onOpenSubmitModal }) => {
+const Layout = ({ children, onOpenSubmitModal }) => {
   const [isAdvertiseModalOpen, setIsAdvertiseModalOpen] = useState(false);
   const [startMarquee, setStartMarquee] = useState(false);
 
@@ -34,7 +34,7 @@ const Layout = ({ children, searchTerm, onSearchChange, onOpenSubmitModal }) => 
     <div className="min-h-screen bg-background text-text font-sans selection:bg-primary/30 relative">
       {/* Version Number */}
       <div className="absolute top-2 left-2 text-[10px] text-text-muted/30 font-mono pointer-events-none z-50">
-        v1.0.1
+        v1.0.2
       </div>
       <AdvertiseModal 
         isOpen={isAdvertiseModalOpen} 
@@ -81,40 +81,35 @@ const Layout = ({ children, searchTerm, onSearchChange, onOpenSubmitModal }) => 
           {/* Left Column: Header + Leaderboard */}
           <div className="lg:col-span-10 flex flex-col">
             {/* Header Section */}
-            <div className="flex flex-col items-center justify-center pt-8 pb-8 px-4 text-center">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg shadow-primary/20">
-                  F
+            {/* Header Section */}
+            {/* Header Section */}
+            <div className="flex flex-col items-start pt-4 pb-12 md:pt-8 md:pb-8">
+              {/* Top Row: Logo/Title + Add Fund Button */}
+              <div className="flex flex-row items-center justify-between w-full mb-4">
+                {/* Logo & Title */}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg shadow-primary/20">
+                    F
+                  </div>
+                  <h1 className="text-xl md:text-4xl font-bold font-display text-white tracking-tight">
+                    FundsRank
+                  </h1>
                 </div>
-                <h1 className="text-xl md:text-4xl font-bold font-display text-white tracking-tight">
-                  FundsRank
-                </h1>
-              </div>
-              
-              <p className="text-text-muted text-sm md:text-xl max-w-xl mb-8 font-light">
-                The database of verified mutual fund returns in Egypt. <span style={{ color: 'red' }}>(Dummy Data)</span>
-              </p>
 
-              <div className="flex items-center gap-2 w-full max-w-lg">
-                <div className="flex-1 flex items-center px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text-muted focus-within:border-primary/50 focus-within:text-text transition-all shadow-sm hover:border-border/80">
-                  <Search className="w-4 h-4 mr-2 text-text-muted" />
-                  <input 
-                    type="text" 
-                    placeholder="Search funds..." 
-                    className="bg-transparent border-none outline-none w-full placeholder:text-text-muted/50"
-                    value={searchTerm}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                  />
-                </div>
+                {/* Add Fund Button */}
                 <button 
                   onClick={onOpenSubmitModal}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-white text-black rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm whitespace-nowrap"
+                  className="flex items-center gap-1.5 px-3 py-1.5 md:px-6 md:py-2.5 bg-white text-black rounded-lg text-xs md:text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm whitespace-nowrap shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">Add Fund</span>
-                  <span className="sm:hidden">Add</span>
+                  <Plus className="w-3 h-3 md:w-4 md:h-4" />
+                  <span>Add Fund</span>
                 </button>
               </div>
+              
+              {/* Description - Full Width */}
+              <p className="text-text-muted text-sm md:text-xl max-w-xl font-light text-left md:whitespace-nowrap">
+                The database of verified mutual fund returns in Egypt. <span style={{ color: 'red' }}>(Dummy Data)</span>
+              </p>
             </div>
 
             {/* Main Content */}

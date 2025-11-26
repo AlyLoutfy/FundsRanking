@@ -55,7 +55,7 @@ const DiscoverFunds = ({ funds, onFundClick }) => {
 
   return (
     <div className="mb-8">
-      <div className="flex items-center justify-between mb-4 px-1">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-primary/10 rounded-lg">
             <Compass className="w-5 h-5 text-primary" />
