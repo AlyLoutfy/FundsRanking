@@ -31,19 +31,26 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
     }
   }, [isOpen]);
 
-  // Prevent body scroll when modal is open
+  // Prevent body scroll when modal is open (enhanced for mobile/iOS)
   React.useEffect(() => {
     if (isVisible) {
+      const scrollY = window.scrollY;
+      const body = document.body;
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      const originalOverflow = document.body.style.overflow;
-      const originalPaddingRight = document.body.style.paddingRight;
       
-      document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.width = '100%';
+      body.style.overflow = 'hidden';
+      body.style.paddingRight = `${scrollbarWidth}px`;
       
       return () => {
-        document.body.style.overflow = originalOverflow;
-        document.body.style.paddingRight = originalPaddingRight;
+        body.style.position = '';
+        body.style.top = '';
+        body.style.width = '';
+        body.style.overflow = '';
+        body.style.paddingRight = '';
+        window.scrollTo(0, scrollY);
       };
     }
   }, [isVisible]);
@@ -113,7 +120,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
             <input
               type="text"
               required
-              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-sm focus:border-primary outline-none transition-colors"
+              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
               placeholder="e.g. CIB Growth Fund"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -123,7 +130,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
           <div>
             <label className="block text-xs font-medium text-text-muted mb-1">Description</label>
             <textarea
-              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-sm focus:border-primary outline-none transition-colors min-h-[60px]"
+              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors min-h-[60px]"
               placeholder="Brief description..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -134,7 +141,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
             <div>
               <label className="block text-xs font-medium text-text-muted mb-1">Category</label>
               <select
-                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-sm focus:border-primary outline-none transition-colors appearance-none"
+                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors appearance-none"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               >
@@ -148,7 +155,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
             <div>
               <label className="block text-xs font-medium text-text-muted mb-1">Risk Level</label>
               <select
-                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-sm focus:border-primary outline-none transition-colors appearance-none"
+                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors appearance-none"
                 value={formData.risk}
                 onChange={(e) => setFormData({ ...formData, risk: e.target.value })}
               >
@@ -163,7 +170,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
             <label className="block text-xs font-medium text-text-muted mb-1">Strategy</label>
             <input
               type="text"
-              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-sm focus:border-primary outline-none transition-colors"
+              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
               placeholder="e.g. Long-term capital appreciation"
               value={formData.strategy}
               onChange={(e) => setFormData({ ...formData, strategy: e.target.value })}
@@ -175,7 +182,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
               <label className="block text-xs font-medium text-text-muted mb-1">Min Investment</label>
               <input
                 type="text"
-                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-sm focus:border-primary outline-none transition-colors"
+                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
                 placeholder="e.g. 10,000 EGP"
                 value={formData.minInvestment}
                 onChange={(e) => setFormData({ ...formData, minInvestment: e.target.value })}
@@ -185,7 +192,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
               <label className="block text-xs font-medium text-text-muted mb-1">Fees</label>
               <input
                 type="text"
-                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-sm focus:border-primary outline-none transition-colors"
+                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
                 placeholder="e.g. 1.5%"
                 value={formData.fees}
                 onChange={(e) => setFormData({ ...formData, fees: e.target.value })}
@@ -199,7 +206,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
               type="number"
               step="0.1"
               required
-              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-sm focus:border-primary outline-none transition-colors"
+              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
               placeholder="e.g. 15.5"
               value={formData.annualReturn}
               onChange={(e) => setFormData({ ...formData, annualReturn: e.target.value })}
