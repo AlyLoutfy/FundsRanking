@@ -34,7 +34,7 @@ const Layout = ({ children, onOpenSubmitModal }) => {
     <div className="min-h-screen bg-background text-text font-sans selection:bg-primary/30 relative">
       {/* Version Number */}
       <div className="absolute top-2 left-2 text-[10px] text-text-muted/30 font-mono pointer-events-none z-50">
-        v1.0.2
+        v1.0.3
       </div>
       <AdvertiseModal 
         isOpen={isAdvertiseModalOpen} 
@@ -136,6 +136,16 @@ const Layout = ({ children, onOpenSubmitModal }) => {
                     for any decisions made based on the information presented here. This is not financial advice.
                   </p>
                 </div>
+                
+                {/* Mobile Advertise Button */}
+                <button 
+                  onClick={() => setIsAdvertiseModalOpen(true)}
+                  className="lg:hidden flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm mx-auto"
+                >
+                  <Megaphone className="w-4 h-4" />
+                  <span>Advertise Here</span>
+                </button>
+                
                 <p>&copy; 2025 FundsRank Egypt. All rights reserved.</p>
               </div>
             </footer>

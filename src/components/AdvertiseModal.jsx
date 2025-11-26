@@ -26,6 +26,30 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
+  // Prevent body scroll when modal is open (enhanced for mobile/iOS)
+  React.useEffect(() => {
+    if (isVisible) {
+      const scrollY = window.scrollY;
+      const body = document.body;
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.width = '100%';
+      body.style.overflow = 'hidden';
+      body.style.paddingRight = `${scrollbarWidth}px`;
+      
+      return () => {
+        body.style.position = '';
+        body.style.top = '';
+        body.style.width = '';
+        body.style.overflow = '';
+        body.style.paddingRight = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isVisible]);
+
   if (!isVisible && !isOpen) return null;
 
   const handleClose = () => {
@@ -45,15 +69,17 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
   return (
     <div 
       className={clsx(
-        "fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm",
+        "fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-4 bg-black/80 backdrop-blur-sm",
         isClosing ? "animate-fadeOut" : "animate-fadeIn"
       )}
       onClick={handleClose}
     >
       <div 
         className={clsx(
-          "bg-surface border border-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl",
-          isClosing ? "animate-scaleOut" : "animate-scaleIn"
+          "bg-surface border-t md:border border-border rounded-t-2xl md:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col",
+          isClosing 
+            ? "animate-drawerClose md:animate-sleekClose" 
+            : "animate-drawerOpen md:animate-sleekOpen"
         )}
         onClick={(e) => e.stopPropagation()}
       >
@@ -67,7 +93,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="overflow-y-auto p-6 space-y-6">
           <div className="space-y-2">
             <p className="text-sm text-text-muted leading-relaxed">
               Reach thousands of investors and fund managers daily. Your brand appears in rotating sponsor slots across all FundsRank pages.
