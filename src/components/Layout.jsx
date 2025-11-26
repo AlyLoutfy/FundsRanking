@@ -31,7 +31,11 @@ const Layout = ({ children, searchTerm, onSearchChange, onOpenSubmitModal }) => 
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-text font-sans selection:bg-primary/30">
+    <div className="min-h-screen bg-background text-text font-sans selection:bg-primary/30 relative">
+      {/* Version Number */}
+      <div className="absolute top-2 left-2 text-[10px] text-text-muted/30 font-mono pointer-events-none z-50">
+        v1.0.1
+      </div>
       <AdvertiseModal 
         isOpen={isAdvertiseModalOpen} 
         onClose={() => setIsAdvertiseModalOpen(false)} 
