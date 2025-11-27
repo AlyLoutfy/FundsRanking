@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { X, Check } from 'lucide-react';
 import clsx from 'clsx';
+import { useMobileOverscroll } from '../hooks/useMobileOverscroll';
+import { useSwipeToClose } from '../hooks/useSwipeToClose';
 
 const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   
+  const scrollRef = useRef(null);
+  const { handlers: overscrollHandlers, style: overscrollStyle } = useMobileOverscroll(scrollRef, isOpen);
+  const { handlers: swipeHandlers, style: swipeStyle, isDragging: isSwiping } = useSwipeToClose(onClose, 100, isOpen);
+
   const [formData, setFormData] = useState({
     name: '',
     category: 'Equity',
@@ -89,6 +95,12 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
       onClick={handleClose}
     >
       <div 
+        {...overscrollHandlers}
+        style={{
+          ...overscrollStyle,
+          transform: isSwiping ? swipeStyle.transform : overscrollStyle.transform,
+          transition: isSwiping ? swipeStyle.transition : overscrollStyle.transition,
+        }}
         className={clsx(
           "bg-surface md:border border-border rounded-t-2xl md:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col",
           isClosing 
@@ -97,7 +109,10 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a]">
+        <div 
+          {...swipeHandlers}
+          className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a] touch-none cursor-grab active:cursor-grabbing"
+        >
           <h3 className="text-base md:text-lg font-bold text-white font-display">Submit a Fund</h3>
           <button 
             onClick={onClose}
@@ -107,7 +122,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
           </button>
         </div>
 
-        <div className="overflow-y-auto p-4 space-y-3">
+        <div ref={scrollRef} className="overflow-y-auto p-4 space-y-3">
           <form onSubmit={handleSubmit} className="space-y-3">
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-4">
             <p className="text-xs text-blue-200">

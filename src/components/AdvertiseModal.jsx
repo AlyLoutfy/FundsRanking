@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { X, Megaphone, Mail, Phone, Send } from 'lucide-react';
 import clsx from 'clsx';
+import { useMobileOverscroll } from '../hooks/useMobileOverscroll';
+import { useSwipeToClose } from '../hooks/useSwipeToClose';
 
 const AdvertiseModal = ({ isOpen, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   
+  const scrollRef = useRef(null);
+  const { handlers: overscrollHandlers, style: overscrollStyle } = useMobileOverscroll(scrollRef, isOpen);
+  const { handlers: swipeHandlers, style: swipeStyle, isDragging: isSwiping } = useSwipeToClose(onClose, 100, isOpen);
+
   const [formData, setFormData] = useState({
     companyName: '',
     email: '',
@@ -75,6 +81,12 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
       onClick={handleClose}
     >
       <div 
+        {...overscrollHandlers}
+        style={{
+          ...overscrollStyle,
+          transform: isSwiping ? swipeStyle.transform : overscrollStyle.transform,
+          transition: isSwiping ? swipeStyle.transition : overscrollStyle.transition,
+        }}
         className={clsx(
           "bg-surface md:border border-border rounded-t-2xl md:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] flex flex-col",
           isClosing 
@@ -83,7 +95,10 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a]">
+        <div 
+          {...swipeHandlers}
+          className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a] touch-none cursor-grab active:cursor-grabbing"
+        >
           <h3 className="text-base md:text-lg font-bold text-white font-display">Advertise on FundsRank</h3>
           <button 
             onClick={onClose}
@@ -93,7 +108,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        <div className="overflow-y-auto p-6 space-y-6">
+        <div ref={scrollRef} className="overflow-y-auto p-6 space-y-6">
           <div className="space-y-2">
             <p className="text-sm text-text-muted leading-relaxed">
               Reach thousands of investors and fund managers daily. Your brand appears in rotating sponsor slots across all FundsRank pages.

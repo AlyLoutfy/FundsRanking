@@ -3,6 +3,9 @@ import { X, TrendingUp, Shield, Target, Wallet, Percent, Calculator, ArrowRightL
 import clsx from 'clsx';
 import TimeMachine from './TimeMachine';
 
+import { useMobileOverscroll } from '../hooks/useMobileOverscroll';
+import { useSwipeToClose } from '../hooks/useSwipeToClose';
+
 const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
   const [leftFund, setLeftFund] = useState(null);
   const [rightFund, setRightFund] = useState(null);
@@ -18,6 +21,12 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
   
   const timeMachineRef = useRef(null);
   const scrollContainerRef = useRef(null);
+
+  // Mobile overscroll hook
+  const { handlers: overscrollHandlers, style: overscrollStyle, offsetY: overscrollOffset } = useMobileOverscroll(scrollContainerRef, isOpen);
+  
+  // Swipe to close hook
+  const { handlers: swipeHandlers, style: swipeStyle, isDragging: isSwiping, offsetY: swipeOffset } = useSwipeToClose(onClose, 100, isOpen);
 
   // Handle open/close animations
   useEffect(() => {
@@ -274,19 +283,40 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
         onClick={handleCloseMain}
       />
 
-      <div className={clsx(
-        "relative bg-[#161616] md:border md:border-[#333] shadow-2xl w-full flex flex-col overflow-hidden transition-all duration-300",
-        // Mobile: full width, rounded top, max-height, slide animation
-        "max-h-[90vh] rounded-t-2xl md:rounded-2xl md:max-h-[90vh]",
-        // Desktop: max-width based on comparison mode
-        showRightColumn ? "md:max-w-5xl" : "md:max-w-xl",
-        // Conditional animations: drawer on mobile, sleek on desktop (matches SubmitFundModal)
-        isClosing 
-          ? "animate-drawerClose md:animate-sleekClose" 
-          : "animate-drawerOpen md:animate-sleekOpen"
-      )}>
+      <div 
+        {...overscrollHandlers}
+        style={{
+          ...overscrollStyle,
+          // Merge styles: if swiping header, override transform.
+          // Actually, we should sum them or prioritize swipe.
+          // Since they are mutually exclusive (one on header, one on content), 
+          // we can just use the active one's transform.
+          // But wait, overscrollHandlers are on the container.
+          // swipeHandlers are on the header.
+          // If I drag header, overscrollHandlers (on container) might also trigger?
+          // No, because overscrollHandlers checks scrollTop > 0.
+          // But if I drag header, scrollTop is 0.
+          // So both might trigger.
+          // We should disable overscroll if isSwiping.
+          transform: isSwiping ? swipeStyle.transform : overscrollStyle.transform,
+          transition: isSwiping ? swipeStyle.transition : overscrollStyle.transition,
+        }}
+        className={clsx(
+          "relative bg-[#161616] md:border md:border-[#333] shadow-2xl w-full flex flex-col overflow-hidden transition-all duration-300",
+          // Mobile: full width, rounded top, max-height, slide animation
+          "max-h-[90vh] rounded-t-2xl md:rounded-2xl md:max-h-[90vh]",
+          // Desktop: max-width based on comparison mode
+          showRightColumn ? "md:max-w-5xl" : "md:max-w-xl",
+          // Conditional animations: drawer on mobile, sleek on desktop (matches SubmitFundModal)
+          isClosing 
+            ? "animate-drawerClose md:animate-sleekClose" 
+            : "animate-drawerOpen md:animate-sleekOpen"
+        )}>
         
-        <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a]">
+        <div 
+          {...swipeHandlers}
+          className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a] touch-none cursor-grab active:cursor-grabbing"
+        >
           <h3 className="text-base md:text-lg font-bold text-white font-display">
             {rightFund ? 'Fund Comparison' : 'Fund Details'}
           </h3>
