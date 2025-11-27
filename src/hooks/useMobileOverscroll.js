@@ -76,6 +76,7 @@ export const useMobileOverscroll = (scrollRef, enabled = true) => {
       transform: `translateY(${offsetY}px)`,
       transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
     },
-    isDragging
+    isDragging,
+    offsetY
   };
 };

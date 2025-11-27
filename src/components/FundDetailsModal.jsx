@@ -6,6 +6,123 @@ import TimeMachine from './TimeMachine';
 import { useMobileOverscroll } from '../hooks/useMobileOverscroll';
 import { useSwipeToClose } from '../hooks/useSwipeToClose';
 
+const FundHeader = ({ fund, onCloseAction, canClose }) => {
+  if (!fund) return null;
+  
+  return (
+  <div className="relative flex items-start gap-4">
+    {canClose && (
+      <button 
+        onClick={onCloseAction}
+        className="absolute -top-2 -right-2 p-1.5 hover:bg-[#333] rounded-full text-text-muted hover:text-white transition-colors z-10"
+        title="Close fund"
+      >
+        <X className="w-4 h-4" />
+      </button>
+    )}
+    <img 
+      src={fund.logo} 
+      alt={fund.name} 
+      className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-contain bg-white p-1 shadow-lg shrink-0"
+      onError={(e) => {
+        e.target.onerror = null; 
+        e.target.src = `https://ui-avatars.com/api/?name=${fund.manager}&background=random&color=fff&size=64`;
+      }}
+    />
+    <div className="min-w-0 flex-1">
+      <div className="flex items-center gap-2 mb-1">
+        <h2 className="text-lg md:text-xl font-bold text-white leading-tight line-clamp-2">{fund.name}</h2>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 mt-1">
+        <p className="text-primary font-medium text-sm">{fund.manager}</p>
+        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#222] text-text-muted border border-[#333] uppercase tracking-wider">
+          {fund.category}
+        </span>
+        <span className={clsx(
+          "px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider",
+          fund.risk === 'High' ? "bg-red-500/10 text-red-400 border-red-500/20" : 
+          fund.risk === 'Medium' ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" : 
+          "bg-green-500/10 text-green-400 border-green-500/20"
+        )}>
+          {fund.risk} Risk
+        </span>
+      </div>
+    </div>
+  </div>
+  );
+};
+
+const StatRow = ({ label, icon: Icon, value1, value2, highlightBetter = false, format = (v) => v, valueClassName = "", showRightColumn }) => {
+  const isBetter = (v1, v2) => {
+    if (typeof v1 === 'number' && typeof v2 === 'number') return v1 > v2;
+    return false;
+  };
+
+  const v1Better = highlightBetter && value2 && isBetter(parseFloat(value1), parseFloat(value2));
+  const v2Better = highlightBetter && value2 && isBetter(parseFloat(value2), parseFloat(value1));
+
+  if (showRightColumn) {
+    return (
+      <div className="py-4 border-b border-white/5 last:border-0">
+        {/* Mobile: Stack vertically with full labels, Desktop: Side by side */}
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-3 md:gap-8">
+          {/* First fund value */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-2 text-text-muted shrink-0 mt-0.5 w-40">
+              {Icon && <Icon className="w-4 h-4 shrink-0" />}
+              <span className="text-xs uppercase tracking-wider font-medium whitespace-nowrap">{label}</span>
+            </div>
+            <span className={clsx(
+              "font-bold text-sm text-left leading-snug flex-1 break-words",
+              v1Better ? "text-green-400" : "text-white",
+              valueClassName
+            )}>
+              {format(value1)}
+            </span>
+          </div>
+
+          {/* Second fund value */}
+          <div className="flex items-start justify-between gap-4">
+            {/* Show label with icon on mobile, hide on desktop (desktop uses label from first column) */}
+            <div className="flex items-center gap-2 text-text-muted shrink-0 mt-0.5 w-40 md:hidden">
+              {Icon && <Icon className="w-4 h-4 shrink-0" />}
+              <span className="text-xs uppercase tracking-wider font-medium whitespace-nowrap">{label}</span>
+            </div>
+            
+            {value2 ? (
+              <span className={clsx(
+                "font-bold text-sm text-left leading-snug flex-1 break-words",
+                v2Better ? "text-green-400" : "text-white",
+                valueClassName
+              )}>
+                {format(value2)}
+              </span>
+            ) : (
+              <span className="text-sm text-text-muted/20 text-left flex-1">-</span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-8 py-4 border-b border-white/5 last:border-0">
+      <div className="flex items-center gap-2 text-text-muted shrink-0 mt-0.5 w-40">
+        {Icon && <Icon className="w-4 h-4" />}
+        <span className="text-xs uppercase tracking-wider font-medium whitespace-nowrap">{label}</span>
+      </div>
+      <span className={clsx(
+        "font-bold text-sm text-left leading-snug flex-1 break-words",
+        "text-white",
+        valueClassName
+      )}>
+        {format(value1)}
+      </span>
+    </div>
+  );
+};
+
 const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
   const [leftFund, setLeftFund] = useState(null);
   const [rightFund, setRightFund] = useState(null);
@@ -155,120 +272,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
     setIsComparing(true);
   };
 
-  const FundHeader = ({ fund, onCloseAction, canClose }) => (
-    <div className="relative flex items-start gap-4">
-      {canClose && (
-        <button 
-          onClick={onCloseAction}
-          className="absolute -top-2 -right-2 p-1.5 hover:bg-[#333] rounded-full text-text-muted hover:text-white transition-colors z-10"
-          title="Close fund"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      )}
-      <img 
-        src={fund.logo} 
-        alt={fund.name} 
-        className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-contain bg-white p-1 shadow-lg shrink-0"
-        onError={(e) => {
-          e.target.onerror = null; 
-          e.target.src = `https://ui-avatars.com/api/?name=${fund.manager}&background=random&color=fff&size=64`;
-        }}
-      />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <h2 className="text-lg md:text-xl font-bold text-white leading-tight line-clamp-2">{fund.name}</h2>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 mt-1">
-          <p className="text-primary font-medium text-sm">{fund.manager}</p>
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#222] text-text-muted border border-[#333] uppercase tracking-wider">
-            {fund.category}
-          </span>
-          <span className={clsx(
-            "px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider",
-            fund.risk === 'High' ? "bg-red-500/10 text-red-400 border-red-500/20" : 
-            fund.risk === 'Medium' ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" : 
-            "bg-green-500/10 text-green-400 border-green-500/20"
-          )}>
-            {fund.risk} Risk
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-
   const showRightColumn = rightFund || isComparing;
-
-  const StatRow = ({ label, icon: Icon, value1, value2, highlightBetter = false, format = (v) => v, valueClassName = "" }) => {
-    const isBetter = (v1, v2) => {
-      if (typeof v1 === 'number' && typeof v2 === 'number') return v1 > v2;
-      return false;
-    };
-
-    const v1Better = highlightBetter && value2 && isBetter(parseFloat(value1), parseFloat(value2));
-    const v2Better = highlightBetter && value2 && isBetter(parseFloat(value2), parseFloat(value1));
-
-    if (showRightColumn) {
-      return (
-        <div className="py-4 border-b border-white/5 last:border-0">
-          {/* Mobile: Stack vertically with full labels, Desktop: Side by side */}
-          <div className="flex flex-col md:grid md:grid-cols-2 gap-3 md:gap-8">
-            {/* First fund value */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-2 text-text-muted shrink-0 mt-0.5 w-40">
-                {Icon && <Icon className="w-4 h-4 shrink-0" />}
-                <span className="text-xs uppercase tracking-wider font-medium whitespace-nowrap">{label}</span>
-              </div>
-              <span className={clsx(
-                "font-bold text-sm text-left leading-snug flex-1 break-words",
-                v1Better ? "text-green-400" : "text-white",
-                valueClassName
-              )}>
-                {format(value1)}
-              </span>
-            </div>
-
-            {/* Second fund value */}
-            <div className="flex items-start justify-between gap-4">
-              {/* Show label with icon on mobile, hide on desktop (desktop uses label from first column) */}
-              <div className="flex items-center gap-2 text-text-muted shrink-0 mt-0.5 w-40 md:hidden">
-                {Icon && <Icon className="w-4 h-4 shrink-0" />}
-                <span className="text-xs uppercase tracking-wider font-medium whitespace-nowrap">{label}</span>
-              </div>
-              
-              {value2 ? (
-                <span className={clsx(
-                  "font-bold text-sm text-left leading-snug flex-1 break-words",
-                  v2Better ? "text-green-400" : "text-white",
-                  valueClassName
-                )}>
-                  {format(value2)}
-                </span>
-              ) : (
-                <span className="text-sm text-text-muted/20 text-left flex-1">-</span>
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex items-start gap-8 py-4 border-b border-white/5 last:border-0">
-        <div className="flex items-center gap-2 text-text-muted shrink-0 mt-0.5 w-40">
-          {Icon && <Icon className="w-4 h-4" />}
-          <span className="text-xs uppercase tracking-wider font-medium whitespace-nowrap">{label}</span>
-        </div>
-        <span className={clsx(
-          "font-bold text-sm text-left leading-snug flex-1 break-words",
-          "text-white",
-          valueClassName
-        )}>
-          {format(value1)}
-        </span>
-      </div>
-    );
-  };
 
   return (
     <div className={clsx(
@@ -281,33 +285,20 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
           isClosing ? "animate-fadeOut" : "animate-fadeIn"
         )}
         onClick={handleCloseMain}
+        onTouchMove={(e) => e.preventDefault()}
       />
 
       <div 
         {...overscrollHandlers}
         style={{
           ...overscrollStyle,
-          // Merge styles: if swiping header, override transform.
-          // Actually, we should sum them or prioritize swipe.
-          // Since they are mutually exclusive (one on header, one on content), 
-          // we can just use the active one's transform.
-          // But wait, overscrollHandlers are on the container.
-          // swipeHandlers are on the header.
-          // If I drag header, overscrollHandlers (on container) might also trigger?
-          // No, because overscrollHandlers checks scrollTop > 0.
-          // But if I drag header, scrollTop is 0.
-          // So both might trigger.
-          // We should disable overscroll if isSwiping.
           transform: isSwiping ? swipeStyle.transform : overscrollStyle.transform,
           transition: isSwiping ? swipeStyle.transition : overscrollStyle.transition,
         }}
         className={clsx(
           "relative bg-[#161616] md:border md:border-[#333] shadow-2xl w-full flex flex-col overflow-hidden transition-all duration-300",
-          // Mobile: full width, rounded top, max-height, slide animation
           "max-h-[90vh] rounded-t-2xl md:rounded-2xl md:max-h-[90vh]",
-          // Desktop: max-width based on comparison mode
           showRightColumn ? "md:max-w-5xl" : "md:max-w-xl",
-          // Conditional animations: drawer on mobile, sleek on desktop (matches SubmitFundModal)
           isClosing 
             ? "animate-drawerClose md:animate-sleekClose" 
             : "animate-drawerOpen md:animate-sleekOpen"
@@ -388,7 +379,6 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
                             onClick={() => handleSelectComparison(f)}
                             className="w-full flex items-center gap-3 p-2 hover:bg-[#2a2a2a] rounded-lg transition-colors text-left group mb-1"
                           >
-                            {/* Updated to match FundRow style */}
                             <img 
                               src={f.logo} 
                               alt={f.name} 
@@ -427,6 +417,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
               value2={rightFund?.annualReturn}
               highlightBetter={true}
               format={(v) => `${v}%`}
+              showRightColumn={showRightColumn}
             />
             <StatRow 
               label="YTD Return" 
@@ -435,18 +426,21 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
               value2={rightFund?.ytdReturn}
               highlightBetter={true}
               format={(v) => `${v > 0 ? '+' : ''}${v}%`}
+              showRightColumn={showRightColumn}
             />
             <StatRow 
               label="Fees" 
               icon={Percent} 
               value1={leftFund.fees} 
               value2={rightFund?.fees}
+              showRightColumn={showRightColumn}
             />
             <StatRow 
               label="Min Investment" 
               icon={Wallet} 
               value1={leftFund.minInvestment} 
               value2={rightFund?.minInvestment}
+              showRightColumn={showRightColumn}
             />
             <StatRow 
               label="Strategy" 
@@ -454,6 +448,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
               value1={leftFund.strategy} 
               value2={rightFund?.strategy}
               valueClassName="text-xs"
+              showRightColumn={showRightColumn}
             />
           </div>
 
