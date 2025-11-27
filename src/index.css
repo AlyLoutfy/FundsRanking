@@ -29,7 +29,9 @@
 
 /* Custom scrollbar for featured funds carousel on mobile */
 .scrollbar-styled::-webkit-scrollbar {
+  -webkit-appearance: none;
   height: 7px;
+  width: 7px;
 }
 
 .scrollbar-styled::-webkit-scrollbar-track {
