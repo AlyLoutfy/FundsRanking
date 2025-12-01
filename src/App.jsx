@@ -6,6 +6,7 @@ import FundDetailsModal from './components/FundDetailsModal';
 import { funds as initialFunds } from './data/funds';
 import DiscoverFunds from './components/DiscoverFunds';
 import { ArrowUpDown, Filter, Search } from 'lucide-react';
+import { useLanguage } from './context/LanguageContext';
 
 function App() {
   const [funds, setFunds] = useState(initialFunds);
@@ -20,6 +21,8 @@ function App() {
 
   const [sortDirection, setSortDirection] = useState('desc');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  
+  const { t } = useLanguage();
   
   // Update sort field based on time period
   useEffect(() => {
@@ -106,13 +109,13 @@ function App() {
           <div className="hidden md:flex items-center justify-between gap-4">
             {/* Left: Title + Search */}
             <div className="flex items-center gap-4">
-              <h2 className="text-xl font-bold text-white font-display pt-1">Leaderboard</h2>
+              <h2 className="text-xl font-bold text-white font-display pt-1">{t('leaderboard')}</h2>
               <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted rtl:left-auto rtl:right-3" />
                 <input 
                   type="text" 
-                  placeholder="Search funds..." 
-                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:border-primary outline-none transition-colors"
+                  placeholder={t('searchPlaceholder')} 
+                  className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:border-primary outline-none transition-colors rtl:pl-4 rtl:pr-9"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -126,14 +129,14 @@ function App() {
                 <select 
                   value={timePeriod}
                   onChange={(e) => setTimePeriod(e.target.value)}
-                  className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors"
+                  className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors rtl:pl-8 rtl:pr-4"
                 >
-                  <option value="all">All Time</option>
-                  <option value="ytd">YTD</option>
-                  <option value="lastYear">Last Year</option>
-                  <option value="last30Days">Last 30 Days</option>
+                  <option value="all">{t('allTime')}</option>
+                  <option value="ytd">{t('ytd')}</option>
+                  <option value="lastYear">{t('lastYear')}</option>
+                  <option value="last30Days">{t('last30Days')}</option>
                 </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted rtl:right-auto rtl:left-3">
                   <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -145,19 +148,19 @@ function App() {
                 <select 
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors"
+                  className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors rtl:pl-8 rtl:pr-4"
                 >
-                  <option value="all">All Categories</option>
-                  <option value="Equity">Equity</option>
-                  <option value="Fixed Income">Fixed Income</option>
-                  <option value="Balanced">Balanced</option>
-                  <option value="Islamic">Islamic</option>
-                  <option value="Growth">Growth</option>
-                  <option value="Money Market">Money Market</option>
-                  <option value="Tech">Tech</option>
-                  <option value="Mixed">Mixed</option>
+                  <option value="all">{t('allCategories')}</option>
+                  <option value="Equity">{t('equity')}</option>
+                  <option value="Fixed Income">{t('fixedIncome')}</option>
+                  <option value="Balanced">{t('balanced')}</option>
+                  <option value="Islamic">{t('islamic')}</option>
+                  <option value="Growth">{t('growth')}</option>
+                  <option value="Money Market">{t('moneyMarket')}</option>
+                  <option value="Tech">{t('tech')}</option>
+                  <option value="Mixed">{t('mixed')}</option>
                 </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted rtl:right-auto rtl:left-3">
                   <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -169,14 +172,14 @@ function App() {
                 <select 
                   value={riskFilter}
                   onChange={(e) => setRiskFilter(e.target.value)}
-                  className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors"
+                  className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-2 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors rtl:pl-8 rtl:pr-4"
                 >
-                  <option value="all">All Risk Levels</option>
-                  <option value="Low">Low Risk</option>
-                  <option value="Medium">Medium Risk</option>
-                  <option value="High">High Risk</option>
+                  <option value="all">{t('allRiskLevels')}</option>
+                  <option value="Low">{t('lowRisk')}</option>
+                  <option value="Medium">{t('mediumRisk')}</option>
+                  <option value="High">{t('highRisk')}</option>
                 </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted rtl:right-auto rtl:left-3">
                   <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -189,13 +192,13 @@ function App() {
           <div className="md:hidden">
             {/* Title + Filter Toggle */}
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white font-display pt-1">Leaderboard</h2>
+              <h2 className="text-xl font-bold text-white font-display pt-1">{t('leaderboard')}</h2>
               <button 
                 onClick={() => setShowMobileFilters(!showMobileFilters)}
                 className="flex items-center gap-2 px-3 py-1.5 bg-[#1a1a1a] border border-[#333] rounded-lg text-xs font-medium text-white hover:bg-[#222] transition-colors"
               >
                 <Filter className="w-3 h-3" />
-                <span>Filters</span>
+                <span>{t('filters')}</span>
                 {(timePeriod !== 'all' || categoryFilter !== 'all' || riskFilter !== 'all') && (
                   <span className="flex h-2 w-2 rounded-full bg-primary ml-1"></span>
                 )}
@@ -204,11 +207,11 @@ function App() {
 
             {/* Search Bar */}
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted rtl:left-auto rtl:right-3" />
               <input 
                 type="text" 
-                placeholder="Search funds..." 
-                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg py-1.5 pl-9 pr-4 text-sm text-white focus:border-primary outline-none transition-colors"
+                placeholder={t('searchPlaceholder')} 
+                className="w-full bg-[#1a1a1a] border border-[#333] rounded-lg py-1.5 pl-9 pr-4 text-sm text-white focus:border-primary outline-none transition-colors rtl:pl-4 rtl:pr-9"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -223,14 +226,14 @@ function App() {
             <select 
               value={timePeriod}
               onChange={(e) => setTimePeriod(e.target.value)}
-              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-1.5 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full"
+              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-1.5 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full rtl:pl-8 rtl:pr-4"
             >
-              <option value="all">All Time</option>
-              <option value="ytd">YTD</option>
-              <option value="lastYear">Last Year</option>
-              <option value="last30Days">Last 30 Days</option>
+              <option value="all">{t('allTime')}</option>
+              <option value="ytd">{t('ytd')}</option>
+              <option value="lastYear">{t('lastYear')}</option>
+              <option value="last30Days">{t('last30Days')}</option>
             </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted rtl:right-auto rtl:left-3">
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -242,19 +245,19 @@ function App() {
             <select 
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-1.5 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full"
+              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-1.5 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full rtl:pl-8 rtl:pr-4"
             >
-              <option value="all">All Categories</option>
-              <option value="Equity">Equity</option>
-              <option value="Fixed Income">Fixed Income</option>
-              <option value="Balanced">Balanced</option>
-              <option value="Islamic">Islamic</option>
-              <option value="Growth">Growth</option>
-              <option value="Money Market">Money Market</option>
-              <option value="Tech">Tech</option>
-              <option value="Mixed">Mixed</option>
+              <option value="all">{t('allCategories')}</option>
+              <option value="Equity">{t('equity')}</option>
+              <option value="Fixed Income">{t('fixedIncome')}</option>
+              <option value="Balanced">{t('balanced')}</option>
+              <option value="Islamic">{t('islamic')}</option>
+              <option value="Growth">{t('growth')}</option>
+              <option value="Money Market">{t('moneyMarket')}</option>
+              <option value="Tech">{t('tech')}</option>
+              <option value="Mixed">{t('mixed')}</option>
             </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted rtl:right-auto rtl:left-3">
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -266,14 +269,14 @@ function App() {
             <select 
               value={riskFilter}
               onChange={(e) => setRiskFilter(e.target.value)}
-              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-1.5 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full"
+              className="appearance-none bg-[#1a1a1a] text-white text-sm font-medium px-4 py-1.5 pr-8 rounded-lg border border-[#333] focus:border-primary outline-none cursor-pointer hover:bg-[#222] transition-colors w-full rtl:pl-8 rtl:pr-4"
             >
-              <option value="all">All Risk Levels</option>
-              <option value="Low">Low Risk</option>
-              <option value="Medium">Medium Risk</option>
-              <option value="High">High Risk</option>
+              <option value="all">{t('allRiskLevels')}</option>
+              <option value="Low">{t('lowRisk')}</option>
+              <option value="Medium">{t('mediumRisk')}</option>
+              <option value="High">{t('highRisk')}</option>
             </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted rtl:right-auto rtl:left-3">
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -285,22 +288,22 @@ function App() {
         <div className="overflow-x-auto">
           <div className="w-full">
             <div className="hidden md:grid grid-cols-12 items-center px-6 py-4 bg-[#111] text-xs font-medium text-text-muted uppercase tracking-wider border-b border-[#222]">
-              <div className="col-span-1 text-center">#</div>
-              <div className="col-span-5 pl-2">Fund</div>
+              <div className="col-span-1 text-center">{t('rank')}</div>
+              <div className="col-span-5 pl-2 rtl:pr-2 rtl:pl-0">{t('fund')}</div>
               <div 
                 className="col-span-3 cursor-pointer hover:text-primary transition-colors flex items-center gap-1 group"
                 onClick={() => handleSort('manager')}
               >
-                <span>Manager</span>
+                <span>{t('manager')}</span>
                 {sortField === 'manager' && (
                   <span className="text-[10px] opacity-70">({sortDirection === 'asc' ? 'A-Z' : 'Z-A'})</span>
                 )}
               </div>
               <div 
-                className="col-span-3 text-right pr-4 cursor-pointer hover:text-primary transition-colors flex items-center justify-end gap-1 group"
+                className="col-span-3 text-right pr-4 rtl:pl-4 rtl:pr-0 cursor-pointer hover:text-primary transition-colors flex items-center justify-end gap-1 group"
                 onClick={() => handleSort(timePeriod === 'ytd' || timePeriod === 'last30Days' ? 'ytdReturn' : 'annualReturn')}
               >
-                <span>Returns</span>
+                <span>{t('returns')}</span>
                 {(sortField === 'annualReturn' || sortField === 'ytdReturn') && (
                   <span className="text-[10px] opacity-70">({sortDirection === 'desc' ? '↓' : '↑'})</span>
                 )}
@@ -328,7 +331,7 @@ function App() {
               onClick={() => setVisibleCount(prev => Math.min(prev + 50, sortedFunds.length))}
               className="px-6 py-2 bg-surface-hover border border-border rounded-lg text-sm font-medium text-text hover:text-white hover:border-primary/50 transition-colors"
             >
-              Show More ({sortedFunds.length - visibleCount} remaining)
+              {t('showMore')} ({sortedFunds.length - visibleCount} {t('remaining')})
             </button>
           </div>
         )}

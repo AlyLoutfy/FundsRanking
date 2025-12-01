@@ -1,8 +1,10 @@
 import React from 'react';
 import { Compass, Info } from 'lucide-react';
 import clsx from 'clsx';
+import { useLanguage } from '../context/LanguageContext';
 
 const DiscoverFunds = ({ funds, onFundClick }) => {
+  const { t } = useLanguage();
   // Mock sponsored funds data
   const sponsoredFunds = [
     {
@@ -53,6 +55,20 @@ const DiscoverFunds = ({ funds, onFundClick }) => {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=64`;
   };
 
+  const getCategoryKey = (category) => {
+    const map = {
+      'Equity': 'equity',
+      'Fixed Income': 'fixedIncome',
+      'Balanced': 'balanced',
+      'Islamic': 'islamic',
+      'Growth': 'growth',
+      'Money Market': 'moneyMarket',
+      'Tech': 'tech',
+      'Mixed': 'mixed'
+    };
+    return map[category] || category;
+  };
+
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
@@ -60,27 +76,27 @@ const DiscoverFunds = ({ funds, onFundClick }) => {
           <div className="p-1.5 bg-primary/10 rounded-lg">
             <Compass className="w-5 h-5 text-primary" />
           </div>
-          <h2 className="text-lg font-bold text-white font-display">Featured Funds</h2>
-          <span className="md:hidden text-[10px] font-medium text-primary/80 animate-pulse ml-auto">
-            Swipe &rarr;
+          <h2 className="text-lg font-bold text-white font-display">{t('featuredFunds')}</h2>
+          <span className="md:hidden text-[10px] font-medium text-primary/80 animate-pulse ml-auto rtl:mr-auto rtl:ml-0 flex items-center gap-1">
+            {t('swipe')} <span className="inline-block rtl:rotate-180">&rarr;</span>
           </span>
         </div>
       </div>
 
       <div className="flex overflow-x-auto pb-4 pt-1 gap-4 snap-x snap-mandatory md:grid md:grid-cols-5 md:overflow-visible md:pb-0 md:pt-0 scrollbar-styled md:mx-0 md:px-0">
         {allFunds.map((fund, index) => (
-          <div key={fund.id} className="relative group pt-4 min-w-[280px] md:min-w-0 snap-center first:pl-2 last:pr-2 md:first:pl-0 md:last:pr-0"> {/* Added more top padding for external badges */}
+          <div key={fund.id} className="relative group pt-4 min-w-[280px] md:min-w-0 snap-center first:pl-2 last:pr-2 md:first:pl-0 md:last:pr-0 rtl:first:pr-2 rtl:last:pl-2 rtl:md:first:pr-0 rtl:md:last:pl-0"> {/* Added more top padding for external badges */}
             
             {/* Tab Style Label for All Cards */}
             {(fund.isSponsored || fund.isNew) && (
-              <div className="absolute -top-[1.5px] right-4 z-20">
+              <div className="absolute -top-[1.5px] right-4 z-20 rtl:right-auto rtl:left-4">
                 <div className={clsx(
                   "px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-t-lg border-t border-x shadow-lg",
                   fund.isSponsored 
                     ? "bg-[#111] text-yellow-400 border-yellow-500/30 shadow-yellow-500/5" 
                     : "bg-[#111] text-blue-400 border-blue-500/50 shadow-blue-500/5"
                 )}>
-                  {fund.isSponsored ? "Promoted" : "New"}
+                  {fund.isSponsored ? t('promoted') : t('new')}
                 </div>
               </div>
             )}
@@ -134,14 +150,14 @@ const DiscoverFunds = ({ funds, onFundClick }) => {
               {/* Footer Row: Stats */}
               <div className="mt-auto flex items-center justify-between pt-2 border-t border-white/5">
                  <div className="flex flex-col">
-                    <span className="text-[8px] text-text-muted uppercase tracking-wider">Return</span>
+                    <span className="text-[8px] text-text-muted uppercase tracking-wider">{t('return')}</span>
                     <span className={clsx("text-xs font-bold", fund.annualReturn >= 0 ? "text-green-400" : "text-red-400")}>
                       {fund.annualReturn > 0 ? "+" : ""}{fund.annualReturn}%
                     </span>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-[8px] text-text-muted uppercase tracking-wider">Type</span>
-                    <span className="text-[10px] font-medium text-white/80">{fund.category}</span>
+                    <span className="text-[8px] text-text-muted uppercase tracking-wider">{t('type')}</span>
+                    <span className="text-[10px] font-medium text-white/80">{t(getCategoryKey(fund.category))}</span>
                   </div>
               </div>
             </div>

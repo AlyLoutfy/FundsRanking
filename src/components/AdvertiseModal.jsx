@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { X, Megaphone, Mail, Phone, Send } from 'lucide-react';
+import { X, Megaphone, Send } from 'lucide-react';
 import clsx from 'clsx';
 import { useMobileOverscroll } from '../hooks/useMobileOverscroll';
 import { useSwipeToClose } from '../hooks/useSwipeToClose';
+import { useLanguage } from '../context/LanguageContext';
 
 const AdvertiseModal = ({ isOpen, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -11,6 +12,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
   const scrollRef = useRef(null);
   const { handlers: overscrollHandlers, style: overscrollStyle } = useMobileOverscroll(scrollRef, isOpen);
   const { handlers: swipeHandlers, style: swipeStyle, isDragging: isSwiping } = useSwipeToClose(onClose, 100, isOpen);
+  const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -67,7 +69,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     // In a real app, this would send an email or API request
     console.log("Advertise Request:", formData);
-    alert("Thanks for your interest! We'll be in touch shortly.");
+    alert(t('inquirySent'));
     onClose();
     setFormData({ companyName: '', email: '', message: '' });
   };
@@ -99,7 +101,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
           {...swipeHandlers}
           className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a] touch-none cursor-grab active:cursor-grabbing"
         >
-          <h3 className="text-base md:text-lg font-bold text-white font-display">Advertise on FundsRank</h3>
+          <h3 className="text-base md:text-lg font-bold text-white font-display">{t('advertiseTitle')}</h3>
           <button 
             onClick={onClose}
             className="p-1.5 md:p-2 hover:bg-[#333] rounded-full transition-colors text-text-muted hover:text-white"
@@ -111,7 +113,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
         <div ref={scrollRef} className="overflow-y-auto p-6 space-y-6">
           <div className="space-y-2">
             <p className="text-sm text-text-muted leading-relaxed">
-              Reach thousands of investors and fund managers daily. Your brand appears in rotating sponsor slots across all FundsRank pages.
+              {t('advertiseDesc')}
             </p>
           </div>
 
@@ -119,44 +121,44 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
           <div className="flex items-center justify-between bg-primary/10 border border-primary/20 rounded-xl p-4">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-              <span className="text-sm font-medium text-white">Available Slots This Month</span>
+              <span className="text-sm font-medium text-white">{t('availableSlots')}</span>
             </div>
-            <span className="text-lg font-bold text-primary">4 Left</span>
+            <span className="text-lg font-bold text-primary">{t('slotsLeft')}</span>
           </div>
 
           {/* Pricing Card */}
           <div className="bg-[#161616] border border-[#333] rounded-xl p-5">
-            <h4 className="text-white font-bold text-sm mb-2">Pricing</h4>
+            <h4 className="text-white font-bold text-sm mb-2">{t('pricing')}</h4>
             <p className="text-text-muted text-xs mb-4">
-              Pay a <span className="text-white font-medium">10,000 EGP monthly fee</span> to display your ad. 
-              This ensures high visibility for your brand.
+              {t('pricingDesc1')} <span className="text-white font-medium">{t('pricingDesc2')}</span>
+              {t('pricingDesc3')}
             </p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-white">10,000 EGP</span>
-              <span className="text-text-muted text-xs">/month</span>
+              <span className="text-2xl font-bold text-white">{t('price')}</span>
+              <span className="text-text-muted text-xs">{t('perMonth')}</span>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-text-muted mb-1.5">Company Name</label>
+              <label className="block text-xs font-medium text-text-muted mb-1.5">{t('companyName')}</label>
               <input
                 type="text"
                 required
-                className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-4 py-2.5 text-white text-sm focus:border-primary outline-none transition-colors placeholder:text-text-muted/30"
-                placeholder="e.g. FinTech Co."
+                className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-4 py-2.5 text-white text-sm focus:border-primary outline-none transition-colors placeholder:text-[#404040] rtl:text-right"
+                placeholder={t('phCompany')}
                 value={formData.companyName}
                 onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-text-muted mb-1.5">Email Address</label>
+              <label className="block text-xs font-medium text-text-muted mb-1.5">{t('emailAddress')}</label>
               <input
                 type="email"
                 required
-                className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-4 py-2.5 text-white text-sm focus:border-primary outline-none transition-colors placeholder:text-text-muted/30"
-                placeholder="you@company.com"
+                className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg px-4 py-2.5 text-white text-sm focus:border-primary outline-none transition-colors placeholder:text-[#404040] rtl:text-right"
+                placeholder={t('phEmail')}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
@@ -167,7 +169,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
               className="w-full bg-white hover:bg-gray-200 text-black font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors mt-2"
             >
               <Send className="w-4 h-4" />
-              Send Inquiry
+              {t('sendInquiry')}
             </button>
           </form>
         </div>

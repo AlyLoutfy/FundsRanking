@@ -3,6 +3,7 @@ import { X, Check } from 'lucide-react';
 import clsx from 'clsx';
 import { useMobileOverscroll } from '../hooks/useMobileOverscroll';
 import { useSwipeToClose } from '../hooks/useSwipeToClose';
+import { useLanguage } from '../context/LanguageContext';
 
 const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -11,6 +12,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
   const scrollRef = useRef(null);
   const { handlers: overscrollHandlers, style: overscrollStyle } = useMobileOverscroll(scrollRef, isOpen);
   const { handlers: swipeHandlers, style: swipeStyle, isDragging: isSwiping } = useSwipeToClose(onClose, 100, isOpen);
+  const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -113,7 +115,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
           {...swipeHandlers}
           className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a] touch-none cursor-grab active:cursor-grabbing"
         >
-          <h3 className="text-base md:text-lg font-bold text-white font-display">Submit a Fund</h3>
+          <h3 className="text-base md:text-lg font-bold text-white font-display">{t('submitFundTitle')}</h3>
           <button 
             onClick={onClose}
             className="p-1.5 md:p-2 hover:bg-[#333] rounded-full transition-colors text-text-muted hover:text-white"
@@ -126,27 +128,27 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
           <form onSubmit={handleSubmit} className="space-y-3">
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-4">
             <p className="text-xs text-blue-200">
-              Note: It takes at most 24h to verify the fund and accept it into our rankings.
+              {t('submitNote')}
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1">Fund Name</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">{t('fundName')}</label>
             <input
               type="text"
               required
-              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
-              placeholder="e.g. CIB Growth Fund"
+              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors rtl:text-right"
+              placeholder={t('phName')}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1">Description</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">{t('description')}</label>
             <textarea
-              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors min-h-[60px]"
-              placeholder="Brief description..."
+              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors min-h-[60px] rtl:text-right"
+              placeholder={t('phDesc')}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
@@ -154,39 +156,39 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-text-muted mb-1">Category</label>
+              <label className="block text-xs font-medium text-text-muted mb-1">{t('category')}</label>
               <select
-                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors appearance-none"
+                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors appearance-none rtl:text-right"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               >
-                <option value="Equity">Equity</option>
-                <option value="Fixed Income">Fixed Income</option>
-                <option value="Mixed">Mixed</option>
-                <option value="Islamic">Islamic</option>
-                <option value="Tech">Tech</option>
+                <option value="Equity">{t('equity')}</option>
+                <option value="Fixed Income">{t('fixedIncome')}</option>
+                <option value="Mixed">{t('mixed')}</option>
+                <option value="Islamic">{t('islamic')}</option>
+                <option value="Tech">{t('tech')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-text-muted mb-1">Risk Level</label>
+              <label className="block text-xs font-medium text-text-muted mb-1">{t('riskLevel')}</label>
               <select
-                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors appearance-none"
+                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors appearance-none rtl:text-right"
                 value={formData.risk}
                 onChange={(e) => setFormData({ ...formData, risk: e.target.value })}
               >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
+                <option value="Low">{t('lowRisk')}</option>
+                <option value="Medium">{t('mediumRisk')}</option>
+                <option value="High">{t('highRisk')}</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1">Strategy</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">{t('strategy')}</label>
             <input
               type="text"
-              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
-              placeholder="e.g. Long-term capital appreciation"
+              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors rtl:text-right"
+              placeholder={t('phStrategy')}
               value={formData.strategy}
               onChange={(e) => setFormData({ ...formData, strategy: e.target.value })}
             />
@@ -194,21 +196,21 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-text-muted mb-1">Min Investment</label>
+              <label className="block text-xs font-medium text-text-muted mb-1">{t('minInvestment')}</label>
               <input
                 type="text"
-                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
-                placeholder="e.g. 10,000 EGP"
+                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors rtl:text-right"
+                placeholder={t('phMinInv')}
                 value={formData.minInvestment}
                 onChange={(e) => setFormData({ ...formData, minInvestment: e.target.value })}
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-text-muted mb-1">Fees</label>
+              <label className="block text-xs font-medium text-text-muted mb-1">{t('fees')}</label>
               <input
                 type="text"
-                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
-                placeholder="e.g. 1.5%"
+                className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors rtl:text-right"
+                placeholder={t('phFees')}
                 value={formData.fees}
                 onChange={(e) => setFormData({ ...formData, fees: e.target.value })}
               />
@@ -216,13 +218,13 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-text-muted mb-1">Annual Return (%)</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">{t('annualReturn')} (%)</label>
             <input
               type="number"
               step="0.1"
               required
-              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors"
-              placeholder="e.g. 15.5"
+              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors rtl:text-right"
+              placeholder={t('phReturn')}
               value={formData.annualReturn}
               onChange={(e) => setFormData({ ...formData, annualReturn: e.target.value })}
             />
@@ -233,7 +235,7 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
             className="w-full bg-primary hover:bg-blue-600 text-white font-bold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors mt-4 text-sm"
           >
             <Check className="w-4 h-4" />
-            Submit Fund
+            {t('submitFundBtn')}
           </button>
           </form>
         </div>

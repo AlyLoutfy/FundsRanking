@@ -22,10 +22,7 @@ export default {
         mono: ['Inconsolata', 'monospace'],
         inter: ['Inter', 'sans-serif'],
       },
-      animation: {
-        scroll: 'scroll 20s linear infinite',
-        'scroll-right': 'scroll-right 20s linear infinite',
-      },
+
       keyframes: {
         scroll: {
           '0%': { transform: 'translateX(0)' },

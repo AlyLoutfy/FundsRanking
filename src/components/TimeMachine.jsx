@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Calculator, Sparkles, TrendingUp, Coins } from 'lucide-react';
 import clsx from 'clsx';
+import { useLanguage } from '../context/LanguageContext';
 
 const TimeMachine = ({ annualReturn, onClose }) => {
   const [monthlyInvestment, setMonthlyInvestment] = useState(1000);
@@ -8,6 +9,7 @@ const TimeMachine = ({ annualReturn, onClose }) => {
   const [futureValue, setFutureValue] = useState(0);
   const [totalInvested, setTotalInvested] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const { t } = useLanguage();
   
   // For formatted display in inputs
   const [monthlyInputValue, setMonthlyInputValue] = useState('1,000');
@@ -102,17 +104,17 @@ const TimeMachine = ({ annualReturn, onClose }) => {
       <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-white/10 rounded-xl p-4 mb-6 text-center relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
         
-        <p className="text-xs text-purple-300 font-medium mb-1 uppercase tracking-wider">Projected Value</p>
+        <p className="text-xs text-purple-300 font-medium mb-1 uppercase tracking-wider">{t('projectedValue')}</p>
         <div className={clsx(
           "text-3xl font-bold text-white font-display transition-all duration-300 flex items-baseline justify-center gap-1",
           isAnimating ? "scale-110 text-purple-200" : "scale-100"
         )}>
           <span>{futureValue.toLocaleString()}</span>
-          <span className="text-sm font-normal text-white/60">EGP</span>
+          <span className="text-sm font-normal text-white/60">{t('egp')}</span>
         </div>
         
         <div className="flex items-center justify-center gap-2 mt-2 text-xs">
-          <span className="text-text-muted">Invested: {totalInvested.toLocaleString()}</span>
+          <span className="text-text-muted">{t('invested')}: {totalInvested.toLocaleString()}</span>
           <span className="text-green-400 font-bold flex items-center gap-0.5">
             <TrendingUp className="w-3 h-3" />
             +{profit.toLocaleString()} ({profitPercentage}%)
@@ -125,7 +127,7 @@ const TimeMachine = ({ annualReturn, onClose }) => {
         {/* Monthly Investment Control */}
         <div>
           <div className="flex justify-between items-center text-xs mb-2">
-            <span className="text-text-muted">Monthly Investment</span>
+            <span className="text-text-muted">{t('monthlyInvestment')}</span>
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -136,7 +138,7 @@ const TimeMachine = ({ annualReturn, onClose }) => {
                 style={{ width: getInputWidth(monthlyInputValue) }}
                 className="bg-[#1a1a1a] border border-[#333] rounded-lg px-2 py-1 text-white text-xs font-bold text-center focus:border-purple-500 focus:outline-none transition-colors"
               />
-              <span className="text-white/60 text-xs">EGP</span>
+              <span className="text-white/60 text-xs">{t('egp')}</span>
             </div>
           </div>
           <input
@@ -150,7 +152,7 @@ const TimeMachine = ({ annualReturn, onClose }) => {
               setMonthlyInvestment(val);
               setMonthlyInputValue(val.toLocaleString());
             }}
-            className="w-full h-2 bg-[#333] rounded-lg appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-all"
+            className="w-full h-2 bg-[#333] rounded-lg appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-all rtl:rotate-180"
           />
           <div className="flex justify-between text-[10px] text-text-muted mt-1">
             <span>500</span>
@@ -161,7 +163,7 @@ const TimeMachine = ({ annualReturn, onClose }) => {
         {/* Duration Control */}
         <div>
           <div className="flex justify-between items-center text-xs mb-2">
-            <span className="text-text-muted">Duration</span>
+            <span className="text-text-muted">{t('duration')}</span>
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -172,7 +174,7 @@ const TimeMachine = ({ annualReturn, onClose }) => {
                 style={{ width: getInputWidth(yearsInputValue) }}
                 className="bg-[#1a1a1a] border border-[#333] rounded-lg px-2 py-1 text-white text-xs font-bold text-center focus:border-blue-500 focus:outline-none transition-colors"
               />
-              <span className="text-white/60 text-xs">Years</span>
+              <span className="text-white/60 text-xs">{t('years')}</span>
             </div>
           </div>
           <input
@@ -186,7 +188,7 @@ const TimeMachine = ({ annualReturn, onClose }) => {
               setYears(val);
               setYearsInputValue(val.toString());
             }}
-            className="w-full h-2 bg-[#333] rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
+            className="w-full h-2 bg-[#333] rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all rtl:rotate-180"
           />
           <div className="flex justify-between text-[10px] text-text-muted mt-1">
             <span>1y</span>
@@ -197,7 +199,7 @@ const TimeMachine = ({ annualReturn, onClose }) => {
 
       {/* Footer Note */}
       <div className="mt-4 pt-3 border-t border-white/5 text-[10px] text-text-muted text-center">
-        Based on historical annual return of {annualReturn}%. Past performance does not guarantee future results.
+        {t('timeMachineDisclaimer').replace('{return}', annualReturn)}
       </div>
     </div>
   );

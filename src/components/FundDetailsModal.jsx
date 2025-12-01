@@ -5,8 +5,34 @@ import TimeMachine from './TimeMachine';
 
 import { useMobileOverscroll } from '../hooks/useMobileOverscroll';
 import { useSwipeToClose } from '../hooks/useSwipeToClose';
+import { useLanguage } from '../context/LanguageContext';
 
 const FundHeader = ({ fund, onCloseAction, canClose }) => {
+  const { t } = useLanguage();
+  
+  const getCategoryKey = (category) => {
+    const map = {
+      'Equity': 'equity',
+      'Fixed Income': 'fixedIncome',
+      'Balanced': 'balanced',
+      'Islamic': 'islamic',
+      'Growth': 'growth',
+      'Money Market': 'moneyMarket',
+      'Tech': 'tech',
+      'Mixed': 'mixed'
+    };
+    return map[category] || category;
+  };
+
+  const getRiskKey = (risk) => {
+    const map = {
+      'Low': 'lowRisk',
+      'Medium': 'mediumRisk',
+      'High': 'highRisk'
+    };
+    return map[risk] || risk;
+  };
+
   if (!fund) return null;
   
   return (
@@ -14,7 +40,7 @@ const FundHeader = ({ fund, onCloseAction, canClose }) => {
     {canClose && (
       <button 
         onClick={onCloseAction}
-        className="absolute -top-2 -right-2 p-1.5 hover:bg-[#333] rounded-full text-text-muted hover:text-white transition-colors z-10"
+        className="absolute -top-2 -right-2 p-1.5 hover:bg-[#333] rounded-full text-text-muted hover:text-white transition-colors z-10 rtl:right-auto rtl:-left-2"
         title="Close fund"
       >
         <X className="w-4 h-4" />
@@ -36,7 +62,7 @@ const FundHeader = ({ fund, onCloseAction, canClose }) => {
       <div className="flex flex-wrap items-center gap-2 mt-1">
         <p className="text-primary font-medium text-sm">{fund.manager}</p>
         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#222] text-text-muted border border-[#333] uppercase tracking-wider">
-          {fund.category}
+          {t(getCategoryKey(fund.category))}
         </span>
         <span className={clsx(
           "px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider",
@@ -44,7 +70,7 @@ const FundHeader = ({ fund, onCloseAction, canClose }) => {
           fund.risk === 'Medium' ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" : 
           "bg-green-500/10 text-green-400 border-green-500/20"
         )}>
-          {fund.risk} Risk
+          {t(getRiskKey(fund.risk))} {t('risk')}
         </span>
       </div>
     </div>
@@ -73,7 +99,7 @@ const StatRow = ({ label, icon: Icon, value1, value2, highlightBetter = false, f
               <span className="text-xs uppercase tracking-wider font-medium whitespace-nowrap">{label}</span>
             </div>
             <span className={clsx(
-              "font-bold text-sm text-left leading-snug flex-1 break-words",
+              "font-bold text-sm text-left leading-snug flex-1 break-words rtl:text-right",
               v1Better ? "text-green-400" : "text-white",
               valueClassName
             )}>
@@ -91,14 +117,14 @@ const StatRow = ({ label, icon: Icon, value1, value2, highlightBetter = false, f
             
             {value2 ? (
               <span className={clsx(
-                "font-bold text-sm text-left leading-snug flex-1 break-words",
+                "font-bold text-sm text-left leading-snug flex-1 break-words rtl:text-right",
                 v2Better ? "text-green-400" : "text-white",
                 valueClassName
               )}>
                 {format(value2)}
               </span>
             ) : (
-              <span className="text-sm text-text-muted/20 text-left flex-1">-</span>
+              <span className="text-sm text-text-muted/20 text-left flex-1 rtl:text-right">-</span>
             )}
           </div>
         </div>
@@ -113,7 +139,7 @@ const StatRow = ({ label, icon: Icon, value1, value2, highlightBetter = false, f
         <span className="text-xs uppercase tracking-wider font-medium whitespace-nowrap">{label}</span>
       </div>
       <span className={clsx(
-        "font-bold text-sm text-left leading-snug flex-1 break-words",
+        "font-bold text-sm text-left leading-snug flex-1 break-words rtl:text-right",
         "text-white",
         valueClassName
       )}>
@@ -144,6 +170,8 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
   
   // Swipe to close hook
   const { handlers: swipeHandlers, style: swipeStyle, isDragging: isSwiping, offsetY: swipeOffset } = useSwipeToClose(onClose, 100, isOpen);
+
+  const { t } = useLanguage();
 
   // Handle open/close animations
   useEffect(() => {
@@ -309,7 +337,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
           className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a] touch-none cursor-grab active:cursor-grabbing"
         >
           <h3 className="text-base md:text-lg font-bold text-white font-display">
-            {rightFund ? 'Fund Comparison' : 'Fund Details'}
+            {rightFund ? t('fundComparison') : t('fundDetails')}
           </h3>
           <button 
             onClick={handleCloseMain}
@@ -341,7 +369,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
             {showRightColumn && (
               <div className={clsx(
                 "flex flex-col gap-4",
-                "pt-4 md:pt-0 border-t md:border-t-0 md:pl-8 md:border-l border-[#333]",
+                "pt-4 md:pt-0 border-t md:border-t-0 md:pl-8 md:border-l border-[#333] rtl:md:pl-0 rtl:md:pr-8 rtl:md:border-l-0 rtl:md:border-r",
                 !rightFund && "min-h-[120px]"
               )}>
                 {rightFund ? (
@@ -358,26 +386,26 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
                 ) : (
                   <div className="h-full flex flex-col bg-[#1a1a1a] rounded-xl p-4 border border-[#333] shadow-inner">
                      <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-sm font-bold text-white">Select Fund to Compare</h4>
-                        <button onClick={() => setIsComparing(false)} className="text-xs text-text-muted hover:text-white">Cancel</button>
+                        <h4 className="text-sm font-bold text-white">{t('selectFundToCompare')}</h4>
+                        <button onClick={() => setIsComparing(false)} className="text-xs text-text-muted hover:text-white">{t('cancel')}</button>
                      </div>
                      <div className="relative mb-3">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted rtl:left-auto rtl:right-3" />
                         <input 
                           type="text" 
                           autoFocus
-                          placeholder="Search funds..." 
-                          className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg py-2 pl-9 pr-4 text-base md:text-sm text-white focus:border-primary outline-none transition-colors shadow-sm"
+                          placeholder={t('searchPlaceholder')} 
+                          className="w-full bg-[#0a0a0a] border border-[#333] rounded-lg py-2 pl-9 pr-4 text-base md:text-sm text-white focus:border-primary outline-none transition-colors shadow-sm rtl:pl-4 rtl:pr-9"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                         />
                      </div>
-                     <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[200px] -mr-2 pr-2">
+                     <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[200px] -mr-2 pr-2 rtl:mr-0 rtl:ml-2 rtl:pl-2">
                         {filteredFunds.map(f => (
                           <button 
                             key={f.id}
                             onClick={() => handleSelectComparison(f)}
-                            className="w-full flex items-center gap-3 p-2 hover:bg-[#2a2a2a] rounded-lg transition-colors text-left group mb-1"
+                            className="w-full flex items-center gap-3 p-2 hover:bg-[#2a2a2a] rounded-lg transition-colors text-left group mb-1 rtl:text-right"
                           >
                             <img 
                               src={f.logo} 
@@ -399,7 +427,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
                         ))}
                         {filteredFunds.length === 0 && (
                           <div className="text-center py-8 text-text-muted text-xs">
-                            No funds found matching "{searchQuery}"
+                            {t('noFundsFound')} "{searchQuery}"
                           </div>
                         )}
                      </div>
@@ -411,7 +439,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
 
           <div className="bg-[#111] rounded-xl border border-[#222] px-4 py-1 mb-4">
             <StatRow 
-              label="Annual Return" 
+              label={t('annualReturn')} 
               icon={TrendingUp} 
               value1={leftFund.annualReturn} 
               value2={rightFund?.annualReturn}
@@ -420,7 +448,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
               showRightColumn={showRightColumn}
             />
             <StatRow 
-              label="YTD Return" 
+              label={t('ytdReturn')} 
               icon={TrendingUp} 
               value1={leftFund.ytdReturn} 
               value2={rightFund?.ytdReturn}
@@ -429,21 +457,21 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
               showRightColumn={showRightColumn}
             />
             <StatRow 
-              label="Fees" 
+              label={t('fees')} 
               icon={Percent} 
               value1={leftFund.fees} 
               value2={rightFund?.fees}
               showRightColumn={showRightColumn}
             />
             <StatRow 
-              label="Min Investment" 
+              label={t('minInvestment')} 
               icon={Wallet} 
               value1={leftFund.minInvestment} 
               value2={rightFund?.minInvestment}
               showRightColumn={showRightColumn}
             />
             <StatRow 
-              label="Strategy" 
+              label={t('strategy')} 
               icon={Target} 
               value1={leftFund.strategy} 
               value2={rightFund?.strategy}
@@ -459,7 +487,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
                 className="w-full py-3 bg-[#1a1a1a] border border-[#333] hover:border-primary/50 hover:bg-[#222] text-text-muted hover:text-white rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 group"
               >
                 <ArrowRightLeft className="w-4 h-4 group-hover:text-primary transition-colors" />
-                Compare with another fund
+                {t('compareWithAnother')}
               </button>
             )}
 
@@ -472,9 +500,9 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-sm font-bold text-white flex items-center gap-2">
                       <Calculator className="w-4 h-4 text-primary" />
-                      Time Machine {rightFund && "Comparison"}
+                      {t('timeMachine')} {rightFund && t('comparison')}
                     </h4>
-                     <button onClick={handleCloseTimeMachine} className="text-xs text-text-muted hover:text-white">Close Time Machine</button>
+                     <button onClick={handleCloseTimeMachine} className="text-xs text-text-muted hover:text-white">{t('closeTimeMachine')}</button>
                   </div>
                   
                   {rightFund ? (
@@ -509,7 +537,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
                   className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20 group"
                 >
                   <Calculator className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                  Launch Time Machine
+                  {t('launchTimeMachine')}
                 </button>
               )}
             </div>

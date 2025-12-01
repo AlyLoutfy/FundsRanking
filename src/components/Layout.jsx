@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Search, Plus, Megaphone } from 'lucide-react';
+import { Plus, Megaphone, Globe } from 'lucide-react';
 import clsx from 'clsx';
 import AdSpace from './AdSpace';
 import AdvertiseModal from './AdvertiseModal';
 import cibLogo from '../assets/cib.png';
+import { useLanguage } from '../context/LanguageContext';
 
 const Layout = ({ children, onOpenSubmitModal }) => {
   const [isAdvertiseModalOpen, setIsAdvertiseModalOpen] = useState(false);
   const [startMarquee, setStartMarquee] = useState(false);
+  const { t, language, toggleLanguage, isTransitioning } = useLanguage();
 
   const CIB_AD_TEXT = "Delivering value to our clients, our community and our shareholders";
 
@@ -32,10 +34,6 @@ const Layout = ({ children, onOpenSubmitModal }) => {
 
   return (
     <div className="min-h-screen bg-background text-text font-sans selection:bg-primary/30 relative">
-      {/* Version Number - Desktop */}
-      <div className="hidden lg:block absolute top-2 left-2 text-[10px] text-text-muted/40 font-mono pointer-events-none z-50">
-        v 1.1.1
-      </div>
       <AdvertiseModal 
         isOpen={isAdvertiseModalOpen} 
         onClose={() => setIsAdvertiseModalOpen(false)} 
@@ -78,17 +76,18 @@ const Layout = ({ children, onOpenSubmitModal }) => {
 
       {/* Version Number - Mobile */}
       <div className="lg:hidden text-left text-[9px] text-text-muted/40 font-mono px-4 pt-2 pb-0">
-        v 1.1.1
+        v 1.2.0
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className={clsx(
+        "max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 transition-opacity duration-300",
+        isTransitioning ? "opacity-0" : "opacity-100"
+      )}>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Header + Leaderboard */}
           <div className="lg:col-span-10 flex flex-col">
             {/* Header Section */}
-            {/* Header Section */}
-            {/* Header Section */}
-            <div className="flex flex-col items-start pt-1 pb-12 md:pt-8 md:pb-8">
+            <div className="flex flex-col items-start pt-1 pb-12 md:pt-4 md:pb-8">
               {/* Top Row: Logo/Title + Add Fund Button */}
               <div className="flex flex-row items-center justify-between w-full mb-4">
                 {/* Logo & Title */}
@@ -97,23 +96,34 @@ const Layout = ({ children, onOpenSubmitModal }) => {
                     F
                   </div>
                   <h1 className="text-xl md:text-4xl font-bold font-display text-white tracking-tight">
-                    FundsRank
+                    {t('appTitle')}
                   </h1>
                 </div>
 
-                {/* Add Fund Button */}
-                <button 
-                  onClick={onOpenSubmitModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 md:px-6 md:py-2.5 bg-white text-black rounded-lg text-xs md:text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm whitespace-nowrap shrink-0"
-                >
-                  <Plus className="w-3 h-3 md:w-4 md:h-4" />
-                  <span>Add Fund</span>
-                </button>
+                <div className="flex items-center gap-3">
+                  {/* Language Toggle - Mobile Only */}
+                  <button
+                    onClick={toggleLanguage}
+                    className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#333] text-white rounded-lg text-xs font-medium hover:bg-[#222] transition-colors"
+                  >
+                    <Globe className="w-3 h-3" />
+                    <span>{language === 'en' ? 'AR' : 'EN'}</span>
+                  </button>
+
+                  {/* Add Fund Button */}
+                  <button 
+                    onClick={onOpenSubmitModal}
+                    className="flex items-center gap-1.5 px-3 py-1.5 md:px-6 md:py-2.5 bg-white text-black rounded-lg text-xs md:text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm whitespace-nowrap shrink-0"
+                  >
+                    <Plus className="w-3 h-3 md:w-4 md:h-4" />
+                    <span>{t('addFund')}</span>
+                  </button>
+                </div>
               </div>
               
               {/* Description - Full Width */}
               <p className="text-text-muted text-sm md:text-xl max-w-xl font-light text-left md:whitespace-nowrap">
-                The database of verified mutual fund returns in Egypt. <span style={{ color: 'red' }}>(Dummy Data)</span>
+                {t('tagline')} <span style={{ color: 'red' }}>{t('dummyData')}</span>
               </p>
             </div>
 
@@ -123,34 +133,42 @@ const Layout = ({ children, onOpenSubmitModal }) => {
             </main>
 
             {/* Footer */}
-            <footer className="border-t border-border mt-12 py-8 text-center text-text-muted text-sm">
-              <div className="max-w-4xl mx-auto space-y-3 px-4">
-                <div className="text-xs leading-relaxed opacity-60">
-                  <p className="mb-2">
-                    This website is a prototype/demonstration project and is not a live, production service. 
-                    All data displayed, including fund names, returns, and performance metrics, is dummy data created 
-                    for demonstration purposes only and does not represent real mutual fund information.
-                  </p>
-                  <p className="mb-2">
-                    All logos, trademarks, and brand names displayed on this website are the property of their respective owners 
-                    and are used here solely for demonstration purposes. Their use does not imply any affiliation, endorsement, 
-                    or partnership with this project. No actual customers or clients are represented on this website.
-                  </p>
-                  <p>
-                    This website is provided "as is" without any warranties or guarantees. The creator assumes no liability 
-                    for any decisions made based on the information presented here. This is not financial advice.
-                  </p>
+            <footer className="border-t border-border mt-8 py-6 text-text-muted text-sm">
+              <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-start justify-between gap-8">
+                
+                {/* Left Side: Copyright & Disclaimers */}
+                <div className="flex flex-col items-start gap-4 w-full md:flex-1 text-left rtl:text-right order-2 md:order-1">
+                  <p className="font-medium text-white/80">{t('copyright')}</p>
+                  <div className="text-xs leading-relaxed opacity-50 space-y-2">
+                    <p>{t('footerDisclaimer1')}</p>
+                    <p>{t('footerDisclaimer2')}</p>
+                    <p>{t('footerDisclaimer3')}</p>
+                  </div>
+                  <div className="text-[10px] font-mono opacity-30 pt-2">
+                    v 1.2.0
+                  </div>
                 </div>
-                
-                <button 
-                  onClick={() => setIsAdvertiseModalOpen(true)}
-                  className="lg:hidden flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm mx-auto"
-                >
-                  <Megaphone className="w-4 h-4" />
-                  <span>Advertise Here</span>
-                </button>
-                
-                <p>&copy; 2025 FundsRank Egypt. All rights reserved.</p>
+
+                {/* Right Side: Controls */}
+                <div className="flex flex-col items-center md:items-end gap-4 w-full md:w-auto order-1 md:order-2">
+                  <button
+                    onClick={toggleLanguage}
+                    className="hidden lg:flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-full hover:bg-[#222] transition-colors group"
+                  >
+                    <Globe className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors" />
+                    <span className="text-xs font-medium text-text-muted group-hover:text-white transition-colors">
+                      {language === 'en' ? 'العربية' : 'English'}
+                    </span>
+                  </button>
+
+                  <button 
+                    onClick={() => setIsAdvertiseModalOpen(true)}
+                    className="lg:hidden w-full flex items-center justify-center gap-2 px-6 py-2.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors shadow-sm"
+                  >
+                    <Megaphone className="w-4 h-4" />
+                    <span>{t('advertiseHere')}</span>
+                  </button>
+                </div>
               </div>
             </footer>
           </div>
@@ -170,7 +188,7 @@ const Layout = ({ children, onOpenSubmitModal }) => {
               className="w-full py-2 mt-2 text-xs text-text-muted hover:text-white transition-colors flex items-center justify-center gap-2 shrink-0 opacity-70 hover:opacity-100"
             >
               <Megaphone className="w-3 h-3" />
-              Advertise Here
+              {t('advertiseHere')}
             </button>
           </div>
         </div>
