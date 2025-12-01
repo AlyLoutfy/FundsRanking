@@ -3,13 +3,21 @@ import Layout from './components/Layout';
 import FundRow from './components/FundRow';
 import SubmitFundModal from './components/SubmitFundModal';
 import FundDetailsModal from './components/FundDetailsModal';
-import { funds as initialFunds } from './data/funds';
+import { useFunds } from './hooks/useFunds';
 import DiscoverFunds from './components/DiscoverFunds';
-import { ArrowUpDown, Filter, Search } from 'lucide-react';
+import { ArrowUpDown, Filter, Search, Loader2 } from 'lucide-react';
 import { useLanguage } from './context/LanguageContext';
 
 function App() {
-  const [funds, setFunds] = useState(initialFunds);
+  const { funds: dbFunds, loading, error } = useFunds();
+  const [funds, setFunds] = useState([]);
+  
+  // Update local state when DB funds are fetched
+  useEffect(() => {
+    if (dbFunds.length > 0) {
+      setFunds(dbFunds);
+    }
+  }, [dbFunds]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFund, setSelectedFund] = useState(null);
@@ -86,7 +94,14 @@ function App() {
     <Layout 
       onOpenSubmitModal={() => setIsModalOpen(true)}
     >
-      <SubmitFundModal 
+      {loading ? (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] text-text-muted">
+          <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary" />
+          <p>{t('loading') || 'Loading funds...'}</p>
+        </div>
+      ) : (
+        <>
+          <SubmitFundModal
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSubmit={handleAddFund}
@@ -335,7 +350,9 @@ function App() {
             </button>
           </div>
         )}
-      </div>
+        </div>
+        </>
+      )}
     </Layout>
   );
 }

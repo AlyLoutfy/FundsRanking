@@ -74,10 +74,7 @@ const Layout = ({ children, onOpenSubmitModal }) => {
         </div>
       </div>
 
-      {/* Version Number - Mobile */}
-      <div className="lg:hidden text-left text-[9px] text-text-muted/40 font-mono px-4 pt-2 pb-0">
-        v 1.2.0
-      </div>
+
 
       <div className={clsx(
         "max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 transition-opacity duration-300",
@@ -145,7 +142,7 @@ const Layout = ({ children, onOpenSubmitModal }) => {
                     <p>{t('footerDisclaimer3')}</p>
                   </div>
                   <div className="text-[10px] font-mono opacity-30 pt-2">
-                    v 1.2.0
+                    v 2.0.0
                   </div>
                 </div>
 

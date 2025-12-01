@@ -39,13 +39,13 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
     if (isVisible) {
       const scrollY = window.scrollY;
       const body = document.body;
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
       
       body.style.position = 'fixed';
       body.style.top = `-${scrollY}px`;
       body.style.width = '100%';
       body.style.overflow = 'hidden';
-      body.style.paddingRight = `${scrollbarWidth}px`;
+
       
       return () => {
         body.style.position = '';

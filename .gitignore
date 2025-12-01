@@ -12,6 +12,7 @@ dist
 dist-ssr
 project_plan.md
 *.local
+.env
 
 # Editor directories and files
 .vscode/*

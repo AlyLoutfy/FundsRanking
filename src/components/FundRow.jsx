@@ -41,12 +41,12 @@ const FundRow = ({ rank, fund, onClick }) => {
       onClick={onClick}
       className="group relative hover:z-50 cursor-pointer transition-all duration-200
         /* Mobile: Card Style */
-        flex flex-col p-4 border-b border-[#222] bg-[#111] hover:bg-[#161616]
+        flex flex-col p-3 md:p-4 border-b border-[#222] bg-[#111] hover:bg-[#161616]
         /* Desktop: Table Row Style */
         md:grid md:grid-cols-12 md:items-center md:px-6 md:py-3 md:border-b-0 md:bg-transparent"
     >
       {/* Mobile Top Row: Rank + Logo + Name + Info */}
-      <div className="flex items-center gap-3 md:contents">
+      <div className="flex items-center gap-2 md:contents">
         
         {/* Rank */}
         <div className="md:col-span-1 flex items-center justify-center shrink-0">
@@ -60,19 +60,19 @@ const FundRow = ({ rank, fund, onClick }) => {
         </div>
 
         {/* Fund Info (Logo + Name) */}
-        <div className="flex-1 flex items-center gap-3 md:col-span-5 md:pl-2 min-w-0">
+        <div className="flex-1 flex items-center gap-2 md:gap-3 md:col-span-5 md:pl-2 min-w-0">
           <div className="relative shrink-0">
             <img 
               src={fund.logo} 
               alt={fund.name} 
-              className="w-10 h-10 md:w-8 md:h-8 rounded-lg object-cover border border-[#333] shadow-sm group-hover:border-[#444] transition-colors"
+              className="w-9 h-9 md:w-8 md:h-8 rounded-lg object-cover border border-[#333] shadow-sm group-hover:border-[#444] transition-colors"
               onError={(e) => {
                 e.target.onerror = null; 
                 e.target.src = `https://ui-avatars.com/api/?name=${fund.manager}&background=random&color=fff&size=64`;
               }}
             />
           </div>
-          <div className="flex flex-col justify-center min-w-0">
+          <div className="flex flex-col justify-center min-w-0 w-full">
             <div className="flex items-center gap-2">
               <h3 className="text-white font-bold text-sm leading-tight group-hover:text-primary transition-colors truncate">
                 {fund.name}

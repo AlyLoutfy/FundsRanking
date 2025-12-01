@@ -211,21 +211,20 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
   // Prevent body scroll when modal is open (fixes mobile scroll issues)
   useEffect(() => {
     if (isVisible) {
-      // Calculate scrollbar width
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
       
       // Store original values
       const originalOverflow = document.body.style.overflow;
-      const originalPaddingRight = document.body.style.paddingRight;
+
       
       // Lock body scroll and add padding to prevent shift
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
+
       
       return () => {
         // Restore original values when modal closes
         document.body.style.overflow = originalOverflow;
-        document.body.style.paddingRight = originalPaddingRight;
+
       };
     }
   }, [isVisible]);
@@ -468,6 +467,7 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
               icon={Wallet} 
               value1={leftFund.minInvestment} 
               value2={rightFund?.minInvestment}
+              format={(v) => v ? Number(v).toLocaleString() : v}
               showRightColumn={showRightColumn}
             />
             <StatRow 
