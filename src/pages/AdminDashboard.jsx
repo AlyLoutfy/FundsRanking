@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useToast } from '../context/ToastContext';
+import { useSettings } from '../hooks/useSettings';
 import { supabase } from '../lib/supabase';
 import { formatDate, formatDateTime } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Database, FileText, Check, X, Loader2, AlertCircle, TrendingUp, Shield, DollarSign, Percent, Target, Search, Info as InfoIcon, Megaphone, MonitorPlay, Activity, ChevronDown, Star } from 'lucide-react';
+import { LogOut, LayoutDashboard, Database, FileText, Check, X, Loader2, AlertCircle, TrendingUp, Shield, DollarSign, Percent, Target, Search, Info as InfoIcon, Megaphone, MonitorPlay, Activity, ChevronDown, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import ConfirmationModal from '../components/ConfirmationModal';
 import SubmissionDetailsModal from '../components/SubmissionDetailsModal';
 
 const AdminDashboard = ({ initialTab = 'submissions' }) => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
@@ -36,6 +39,9 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
   const [adFilter, setAdFilter] = useState('all'); // 'all', 'pending', 'active', 'rejected'
   const [adView, setAdView] = useState('requests'); // 'requests', 'live'
   const [fundSearchQuery, setFundSearchQuery] = useState('');
+  const [managerFilter, setManagerFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 100;
 
   // Modal State
   const [modalConfig, setModalConfig] = useState({
@@ -51,14 +57,44 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
   const [editFundData, setEditFundData] = useState(null);
   const [selectedFunds, setSelectedFunds] = useState(new Set());
   const [analytics, setAnalytics] = useState({ funds: {}, ads: {} });
+  const { settings, updateSetting, loading: settingsLoading } = useSettings();
+  const [editingPrice, setEditingPrice] = useState(null);
   
   // Refs for sliding tabs
 
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    fetchData();
     fetchUser();
+    fetchDashboardData();
+
+    // Real-time subscriptions
+    const fundsSubscription = supabase
+      .channel('admin-funds')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'funds' }, () => {
+        fetchDashboardData();
+      })
+      .subscribe();
+
+    const submissionsSubscription = supabase
+      .channel('admin-submissions')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fund_submissions' }, () => {
+        fetchDashboardData();
+      })
+      .subscribe();
+
+    const adsSubscription = supabase
+      .channel('admin-ads')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ads' }, () => {
+        fetchDashboardData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(fundsSubscription);
+      supabase.removeChannel(submissionsSubscription);
+      supabase.removeChannel(adsSubscription);
+    };
   }, []);
 
   const fetchUser = async () => {
@@ -66,7 +102,7 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
     setUser(user);
   };
 
-  const fetchData = async () => {
+  const fetchDashboardData = async () => {
     setLoading(true);
     try {
       // Fetch Total Funds Count
@@ -125,16 +161,36 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
 
       // Aggregate Analytics
       const agg = { funds: {}, ads: {} };
+      let totalFundClicks = 0;
+      let totalAdClicks = 0;
+
       analyticsData.forEach(event => {
         if (event.target_type === 'fund') {
           if (!agg.funds[event.target_id]) agg.funds[event.target_id] = { clicks: 0 };
-          if (event.event_type === 'fund_click') agg.funds[event.target_id].clicks++;
+          if (event.event_type === 'fund_click') {
+            agg.funds[event.target_id].clicks++;
+            totalFundClicks++;
+          }
         } else if (event.target_type === 'ad') {
           if (!agg.ads[event.target_id]) agg.ads[event.target_id] = { views: 0, clicks: 0 };
           if (event.event_type === 'ad_view') agg.ads[event.target_id].views++;
-          if (event.event_type === 'ad_click') agg.ads[event.target_id].clicks++;
+          if (event.event_type === 'ad_click') {
+            agg.ads[event.target_id].clicks++;
+            totalAdClicks++;
+          }
         }
       });
+
+      // Attach totals
+      Object.defineProperty(agg.funds, 'total_clicks', {
+        value: totalFundClicks,
+        enumerable: false // Keep it non-enumerable to be safe
+      });
+      Object.defineProperty(agg.ads, 'total_clicks', {
+        value: totalAdClicks,
+        enumerable: false
+      });
+
       setAnalytics(agg);
 
     } catch (error) {
@@ -220,10 +276,12 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
       // 4. Refresh local state (Update instead of filter)
       setSubmissions(prev => prev.map(s => s.id === submission.id ? { ...s, ...updates } : s));
       setTotalFunds(prev => prev + 1); // Increment total funds
+      
+      showToast(`Fund ${submission.fund_name} approved successfully`, 'success');
 
     } catch (error) {
       console.error('Error approving fund:', error);
-      alert('Error approving fund: ' + error.message);
+      showToast('Error approving fund: ' + error.message, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -264,9 +322,11 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
 
       // Update local state instead of removing
       setSubmissions(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+      
+      showToast(`Fund ${fundName} request rejected`, 'success');
     } catch (error) {
       console.error('Error rejecting submission:', error);
-      alert('Error rejecting submission');
+      showToast('Error rejecting submission', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -303,9 +363,11 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
       if (newStatus === 'active') setTotalFunds(prev => prev + 1);
       else setTotalFunds(prev => prev - 1);
 
+      showToast(`Fund ${fund.name_en} ${newStatus === 'active' ? 'activated' : 'hidden'} successfully`, 'success');
+
     } catch (error) {
       console.error('Error updating fund:', error);
-      alert('Error updating fund status');
+      showToast('Error updating fund status', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -341,9 +403,11 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
       await logAction('toggle_ad', 'ad', ad.id, { new_status: newStatus, company: ad.company_name });
 
       setAds(prev => prev.map(a => a.id === ad.id ? { ...a, status: newStatus } : a));
+      
+      showToast(`Ad ${ad.company_name} ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`, 'success');
     } catch (error) {
       console.error('Error updating ad:', error);
-      alert('Error updating ad status');
+      showToast('Error updating ad status', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -364,9 +428,11 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
 
       await logAction('reject_ad', 'ad', ad.id, { company: ad.company_name });
       setAds(prev => prev.map(a => a.id === ad.id ? { ...a, status: 'rejected' } : a));
+      
+      showToast(`Ad request from ${ad.company_name} declined`, 'success');
     } catch (error) {
       console.error('Error declining ad:', error);
-      alert('Error declining ad');
+      showToast('Error declining ad', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -436,7 +502,7 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
           is_promoted: false
         })));
         
-        // alert(`Removed promotion from ${fund.name_en}`);
+        showToast(`Fund ${fund.name_en} promotion removed`, 'success');
         await logAction('unpromote_fund', 'fund', fund.id, { name: fund.name_en });
       } else {
         // If not promoted, promote it (and clear others)
@@ -449,13 +515,13 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
           is_promoted: f.id === fund.id
         })));
         
-        // alert(`Promoted ${fund.name_en}`);
+        showToast(`Fund ${fund.name_en} promoted successfully`, 'success');
         await logAction('promote_fund', 'fund', fund.id, { name: fund.name_en });
       }
 
     } catch (error) {
       console.error('Error updating promotion:', error);
-      alert('Error updating promotion');
+      showToast('Error updating promotion', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -510,10 +576,10 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
       // Close modal with animation
       handleCloseModal();
       
-      await logAction('update_fund', 'fund', editFundData.id, { fund_name: editFundData.name_en });
+      showToast(`Fund ${editFundData.name_en} details updated successfully`, 'success');
     } catch (error) {
       console.error('Error updating fund:', error);
-      alert('Error updating fund details');
+      showToast('Error updating fund details', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -547,14 +613,25 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
     if (selectedFunds.size === 0) return;
     
     const confirmMessage = `Are you sure you want to ${action === 'active' ? 'activate' : 'hide'} ${selectedFunds.size} funds?`;
-    if (!window.confirm(confirmMessage)) return;
+    
+    setModalConfig({
+      isOpen: true,
+      title: action === 'active' ? 'Activate Funds' : 'Hide Funds',
+      message: confirmMessage,
+      type: action === 'active' ? 'success' : 'danger',
+      confirmText: action === 'active' ? 'Activate' : 'Hide',
+      onConfirm: () => executeBulkAction(action)
+    });
+  };
 
+  const executeBulkAction = async (action) => {
     setActionLoading('bulk');
     try {
       const { error } = await supabase
-        .from('funds')
-        .update({ status: action })
-        .in('id', Array.from(selectedFunds));
+        .rpc('bulk_update_fund_status', {
+          fund_ids: Array.from(selectedFunds),
+          new_status: action
+        });
 
       if (error) throw error;
 
@@ -564,9 +641,11 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
       
       setSelectedFunds(new Set());
       await logAction('bulk_update', 'fund', 'bulk', { action, count: selectedFunds.size });
+      
+      showToast(`${selectedFunds.size} funds ${action === 'active' ? 'activated' : 'hidden'} successfully`, 'success');
     } catch (error) {
       console.error('Error performing bulk action:', error);
-      alert('Error updating funds');
+      showToast('Error updating funds', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -589,13 +668,13 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file');
+        showToast('Please upload an image file', 'error');
         return;
     }
 
     // Validate file size (e.g., 2MB)
     if (file.size > 2 * 1024 * 1024) {
-        alert('File size must be less than 2MB');
+        showToast('File size must be less than 2MB', 'error');
         return;
     }
 
@@ -618,7 +697,7 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
         setEditAdData(prev => ({ ...prev, image_url: publicUrl }));
     } catch (error) {
         console.error('Error uploading file:', error);
-        alert('Error uploading file');
+        showToast('Error uploading file', 'error');
     } finally {
         setActionLoading(null);
     }
@@ -649,10 +728,10 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
 
         setModalConfig({ isOpen: false, type: null, data: null });
         setEditAdData(null);
-        await logAction('update_ad', 'ad', editAdData.id, { company: editAdData.company_name });
+        showToast(`Ad ${editAdData.company_name} details updated successfully`, 'success');
     } catch (error) {
         console.error('Error updating ad:', error);
-        alert('Error updating ad details');
+        showToast('Error updating ad details', 'error');
     } finally {
         setActionLoading(null);
     }
@@ -706,6 +785,36 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, [modalConfig.isOpen]);
+
+  const handleUpdatePrice = async () => {
+    if (!editingPrice) return;
+    
+    const amount = parseInt(editingPrice);
+    if (isNaN(amount) || amount < 0) {
+      showToast('Please enter a valid price', 'error');
+      return;
+    }
+
+    setActionLoading('price');
+    try {
+      const { error } = await updateSetting('ad_price', { 
+        currency: 'EGP',
+        period: 'month',
+        ...settings.ad_price, 
+        amount: amount
+      });
+      
+      if (error) throw error;
+      
+      showToast('Ad price updated successfully', 'success');
+      setEditingPrice(null);
+    } catch (error) {
+      console.error('Error updating price:', error);
+      showToast(`Error updating price: ${error.message || 'Unknown error'}`, 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-text font-sans">
@@ -951,59 +1060,212 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
           
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-surface border border-border rounded-xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Database className="w-5 h-5 text-primary" />
-                  </div>
-                  <span className="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-1 rounded-full">
-                    Live
-                  </span>
+              {/* Ad Revenue Card */}
+              <div className="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <DollarSign className="w-16 h-16 text-green-400" />
                 </div>
-                <h3 className="text-text-muted text-sm font-medium">Total Funds</h3>
-                <p className="text-2xl font-bold text-white mt-1">{totalFunds}</p>
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="p-2 bg-green-500/10 rounded-lg">
+                    <DollarSign className="w-5 h-5 text-green-400" />
+                  </div>
+                </div>
+                <h3 className="text-text-muted text-sm font-medium relative z-10">Est. Monthly Revenue</h3>
+                <p className="text-2xl font-bold text-white mt-1 relative z-10">
+                  {settingsLoading ? (
+                    <div className="relative flex h-6 w-6 items-center justify-center">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </div>
+                  ) : (
+                    new Intl.NumberFormat('en-US', { style: 'currency', currency: settings?.ad_price?.currency || 'EGP' }).format(
+                      ads.filter(a => a.status === 'active').length * (settings?.ad_price?.amount || 10000)
+                    )
+                  )}
+                </p>
+                <p className="text-xs font-normal text-text-muted mt-1 relative z-10">
+                  (from {ads.filter(a => a.status === 'active').length} active ads)
+                </p>
+                
+                <div className="mt-4 pt-4 border-t border-white/5 relative z-10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-text-muted">Ad Price / Month</span>
+                    {editingPrice !== null ? (
+                      <div className="flex gap-1 items-center z-20 relative">
+                        <input 
+                          type="number" 
+                          value={editingPrice}
+                          onChange={(e) => setEditingPrice(e.target.value)}
+                          className="w-24 bg-black/40 border border-border rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-primary"
+                          autoFocus
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdatePrice();
+                          }}
+                          className="p-1 bg-primary text-black rounded hover:bg-primary-hover flex items-center justify-center"
+                        >
+                          <Check className="w-3 h-3" />
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingPrice(null);
+                          }}
+                          className="p-1 bg-white/10 text-white rounded hover:bg-white/20 flex items-center justify-center"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-white">
+                          {settingsLoading ? (
+                            <span className="inline-block w-20 h-5 bg-white/10 rounded animate-pulse"></span>
+                          ) : (
+                            new Intl.NumberFormat('en-US', { style: 'currency', currency: settings?.ad_price?.currency || 'EGP' }).format(settings?.ad_price?.amount || 10000)
+                          )}
+                        </span>
+                        <button 
+                          onClick={() => setEditingPrice(settings?.ad_price?.amount || 10000)}
+                          className="text-[10px] font-bold text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div className="bg-surface border border-border rounded-xl p-6">
-                <div className="flex items-center justify-between mb-4">
+              {/* Funds Overview Card */}
+              <div className="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Database className="w-16 h-16 text-blue-400" />
+                </div>
+                <div className="flex items-center justify-between mb-4 relative z-10">
                   <div className="p-2 bg-blue-500/10 rounded-lg">
-                    <FileText className="w-5 h-5 text-blue-400" />
+                    <Database className="w-5 h-5 text-blue-400" />
+                  </div>
+                </div>
+                <h3 className="text-text-muted text-sm font-medium relative z-10">Active Funds</h3>
+                <p className="text-2xl font-bold text-white mt-1 relative z-10 flex items-center gap-2">
+                  {loading ? (
+                    <div className="relative flex h-6 w-6 items-center justify-center">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                    </div>
+                  ) : (
+                    <>
+                      {liveFunds.filter(f => f.status === 'active').length}
+                      <span className="text-sm font-normal text-text-muted ml-2">
+                        ({liveFunds.filter(f => f.status !== 'active').length} Hidden)
+                      </span>
+                    </>
+                  )}
+                </p>
+                
+                <div className="mt-4 pt-4 border-t border-white/5 relative z-10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-text-muted">Top Performer (1Y)</span>
+                  </div>
+                  {liveFunds.length > 0 && (
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-xs font-medium text-white truncate max-w-[120px]">
+                        {[...liveFunds].sort((a, b) => b.return_1y - a.return_1y)[0]?.name_en}
+                      </span>
+                      <span className="text-xs font-bold text-green-400">
+                        {parseFloat([...liveFunds].sort((a, b) => b.return_1y - a.return_1y)[0]?.return_1y).toFixed(2)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Submissions Card */}
+              <div className="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <FileText className="w-16 h-16 text-yellow-400" />
+                </div>
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="p-2 bg-yellow-500/10 rounded-lg">
+                    <FileText className="w-5 h-5 text-yellow-400" />
                   </div>
                   {submissions.filter(s => s.status === 'pending').length > 0 && (
-                    <span className="text-xs font-bold text-yellow-400 bg-yellow-500/10 px-2 py-1 rounded-full">
+                    <span className="text-xs font-bold text-yellow-400 bg-yellow-500/10 px-2 py-1 rounded-full animate-pulse">
                       {submissions.filter(s => s.status === 'pending').length} Pending
                     </span>
                   )}
                 </div>
-                <h3 className="text-text-muted text-sm font-medium">Fund Requests</h3>
-                <p className="text-2xl font-bold text-white mt-1">{submissions.length}</p>
-              </div>
+                <h3 className="text-text-muted text-sm font-medium relative z-10">Total Requests</h3>
+                <p className="text-2xl font-bold text-white mt-1 relative z-10">
+                  {loading ? (
+                    <div className="relative flex h-6 w-6 items-center justify-center">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                    </div>
+                  ) : (
+                    submissions.length
+                  )}
 
-              <div className="bg-surface border border-border rounded-xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-purple-500/10 rounded-lg">
-                    <Megaphone className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <span className="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-1 rounded-full">
-                    {ads.filter(a => a.status === 'active').length} Active
-                  </span>
-                </div>
-                <h3 className="text-text-muted text-sm font-medium">Total Ads</h3>
-                <p className="text-2xl font-bold text-white mt-1">{ads.length}</p>
-              </div>
-
-              <div className="bg-surface border border-border rounded-xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-2 bg-orange-500/10 rounded-lg">
-                    <Target className="w-5 h-5 text-orange-400" />
-                  </div>
-                </div>
-                <h3 className="text-text-muted text-sm font-medium">Total Clicks</h3>
-                <p className="text-2xl font-bold text-white mt-1">
-                  {Object.values(analytics.funds).reduce((acc, curr) => acc + (curr.clicks || 0), 0) + 
-                   Object.values(analytics.ads).reduce((acc, curr) => acc + (curr.clicks || 0), 0)}
                 </p>
+                
+                <div className="mt-4 pt-4 border-t border-white/5 relative z-10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-text-muted">Approval Rate</span>
+                    <span className="text-xs font-bold text-white">
+                      {submissions.length > 0 
+                        ? Math.round((submissions.filter(s => s.status === 'approved').length / submissions.length) * 100) 
+                        : 0}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-white/10 h-1 rounded-full mt-2 overflow-hidden">
+                    <div 
+                      className="bg-yellow-400 h-full rounded-full" 
+                      style={{ width: `${submissions.length > 0 ? (submissions.filter(s => s.status === 'approved').length / submissions.length) * 100 : 0}%` }}
+                    ></div>
+                  </div>
+                </div>
               </div>
+
+              {/* Engagement Card */}
+              <div className="bg-surface border border-border rounded-xl p-6 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Target className="w-16 h-16 text-purple-400" />
+                </div>
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="p-2 bg-purple-500/10 rounded-lg">
+                    <Target className="w-5 h-5 text-purple-400" />
+                  </div>
+                </div>
+                <h3 className="text-text-muted text-sm font-medium relative z-10">Total Clicks</h3>
+                <p className="text-2xl font-bold text-white mt-1 relative z-10">
+                  {loading ? (
+                    <div className="relative flex h-6 w-6 items-center justify-center">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                    </div>
+                  ) : (
+                    analytics.ads.total_clicks + analytics.funds.total_clicks
+                  )}
+
+                </p>
+                
+                <div className="mt-4 pt-4 border-t border-white/5 relative z-10 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-text-muted">Fund Clicks</span>
+                    <span className="text-white">{analytics.funds.total_clicks}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-text-muted">Ad Clicks</span>
+                    <span className="text-white">{analytics.ads.total_clicks}</span>
+                  </div>
+                </div>
+              </div>
+
+
             </div>
           )}
         </div>
@@ -1172,221 +1434,282 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
               </>
             )}
 
-            {activeTab === 'funds' && (
-              <>
-                {/* Search Bar */}
-                <div className="mb-4 relative">
-                  <input
-                    type="text"
-                    placeholder="Search funds by name or manager..."
-                    value={fundSearchQuery}
-                    onChange={(e) => setFundSearchQuery(e.target.value)}
-                    className="w-full bg-surface border border-border rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors"
-                  />
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                </div>
+            {activeTab === 'funds' && (() => {
+              // Filter Logic
+              const managers = [...new Set(liveFunds.map(f => f.manager_en))].sort();
+              
+              const filteredFunds = liveFunds.filter(f => {
+                const matchesSearch = f.name_en.toLowerCase().includes(fundSearchQuery.toLowerCase()) || 
+                                      f.manager_en.toLowerCase().includes(fundSearchQuery.toLowerCase());
+                const matchesManager = managerFilter === 'all' || f.manager_en === managerFilter;
+                return matchesSearch && matchesManager;
+              });
 
-                {liveFunds.filter(f => 
-                  f.name_en.toLowerCase().includes(fundSearchQuery.toLowerCase()) || 
-                  f.manager_en.toLowerCase().includes(fundSearchQuery.toLowerCase())
-                ).length === 0 ? (
-                  <div className="text-center py-12 bg-surface border border-border rounded-xl">
-                    <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Search className="w-6 h-6 text-text-muted" />
+              // Pagination Logic
+              const totalPages = Math.ceil(filteredFunds.length / itemsPerPage);
+              const paginatedFunds = filteredFunds.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+              return (
+                <>
+                  {/* Controls */}
+                  <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    {/* Search */}
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        placeholder="Search funds by name or manager..."
+                        value={fundSearchQuery}
+                        onChange={(e) => { setFundSearchQuery(e.target.value); setCurrentPage(1); }}
+                        className="w-full bg-surface border border-border rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-primary transition-colors"
+                      />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                     </div>
-                    <p className="text-text-muted">No funds found matching your search</p>
-                  </div>
-                ) : (
-                  <div className="bg-surface border border-border rounded-xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-sm">
-                        <thead className="bg-[#1a1a1a] text-text-muted border-b border-border">
-                          <tr>
-                            <th className="px-4 py-2 w-10">
-                              <button
-                                onClick={(e) => handleSelectAll({ target: { checked: !(liveFunds.length > 0 && selectedFunds.size === liveFunds.filter(f => 
-                                  f.name_en.toLowerCase().includes(fundSearchQuery.toLowerCase()) || 
-                                  f.manager_en.toLowerCase().includes(fundSearchQuery.toLowerCase())
-                                ).length) } })}
-                                className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
-                                  liveFunds.length > 0 && selectedFunds.size === liveFunds.filter(f => 
-                                    f.name_en.toLowerCase().includes(fundSearchQuery.toLowerCase()) || 
-                                    f.manager_en.toLowerCase().includes(fundSearchQuery.toLowerCase())
-                                  ).length
-                                    ? 'bg-primary border-primary text-black' 
-                                    : 'border-white/20 bg-white/5 hover:border-white/40'
-                                }`}
-                              >
-                                {liveFunds.length > 0 && selectedFunds.size === liveFunds.filter(f => 
-                                  f.name_en.toLowerCase().includes(fundSearchQuery.toLowerCase()) || 
-                                  f.manager_en.toLowerCase().includes(fundSearchQuery.toLowerCase())
-                                ).length && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
-                              </button>
-                            </th>
-                            <th className="px-4 py-2 font-medium">Fund</th>
-                            <th className="px-4 py-2 font-medium">Category / Risk</th>
-                            <th className="px-4 py-2 font-medium text-center">Clicks</th>
-                            <th className="px-4 py-2 font-medium text-right">Returns</th>
-                            <th className="px-4 py-2 font-medium text-right">Min Inv / Fees</th>
-                            <th className="px-4 py-2 font-medium text-center">Status</th>
-                            <th className="px-4 py-2 font-medium text-right">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                          {liveFunds
-                            .filter(f => 
-                              f.name_en.toLowerCase().includes(fundSearchQuery.toLowerCase()) || 
-                              f.manager_en.toLowerCase().includes(fundSearchQuery.toLowerCase())
-                            )
-                            .map(fund => (
-                            <tr key={fund.id} className={`hover:bg-white/5 transition-colors group ${selectedFunds.has(fund.id) ? 'bg-white/5' : ''}`}>
-                              <td className="px-4 py-2">
-                                <button
-                                  onClick={() => handleSelectFund(fund.id)}
-                                  className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
-                                    selectedFunds.has(fund.id) 
-                                      ? 'bg-primary border-primary text-black' 
-                                      : 'border-white/20 bg-white/5 hover:border-white/40'
-                                  }`}
-                                >
-                                  {selectedFunds.has(fund.id) && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
-                                </button>
-                              </td>
-                              <td className="px-4 py-2">
-                                <div className="flex items-center gap-3">
-                                  {fund.logo && (
-                                    <img 
-                                      src={fund.logo} 
-                                      alt={fund.name_en} 
-                                      className="w-8 h-8 rounded-lg object-cover bg-white/5"
-                                      onError={(e) => {
-                                        e.target.style.display = 'none';
-                                        e.target.nextSibling.style.display = 'flex';
-                                      }}
-                                    />
-                                  )}
-                                  <div 
-                                    className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-xs"
-                                    style={{ display: fund.logo ? 'none' : 'flex' }}
-                                  >
-                                    {fund.name_en.substring(0, 2).toUpperCase()}
-                                  </div>
-                                  <div>
-                                    <div className="font-medium text-white">{fund.name_en}</div>
-                                    <div className="text-xs text-text-muted">{fund.manager_en}</div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-4 py-2">
-                                <div className="text-white">{fund.category}</div>
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
-                                  fund.risk_level === 'High' || fund.risk_level === 'Very High' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                  fund.risk_level === 'Medium' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                                  'bg-green-500/10 text-green-400 border-green-500/20'
-                                }`}>
-                                  {fund.risk_level} Risk
-                                </span>
-                              </td>
-                              <td className="px-4 py-2 text-center">
-                                <span className="text-white font-mono">{analytics.funds[fund.id]?.clicks || 0}</span>
-                              </td>
-                              <td className="px-4 py-2 text-right">
-                                <div className={`font-medium ${fund.return_1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                  {fund.return_1y}% <span className="text-[10px] text-text-muted">1Y</span>
-                                </div>
-                                <div className={`text-xs ${fund.return_ytd >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                  {fund.return_ytd}% <span className="text-[10px] text-text-muted">YTD</span>
-                                </div>
-                              </td>
-                              <td className="px-4 py-2 text-right">
-                                <div className="text-white">{fund.min_investment?.toLocaleString()}</div>
-                                <div className="text-xs text-text-muted">{fund.fees}% Fees</div>
-                              </td>
-                              <td className="px-4 py-2 text-center">
-                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${
-                                  fund.status === 'active' 
-                                    ? 'bg-green-500/10 text-green-400 border-green-500/20' 
-                                    : 'bg-red-500/10 text-red-400 border-red-500/20'
-                                }`}>
-                                  {fund.status.toUpperCase()}
-                                </span>
-                              </td>
-                                <td className="px-4 py-3 text-right">
-                                  <div className="flex items-center justify-end gap-2">
-                                    <button
-                                      onClick={() => handlePromoteFund(fund)}
-                                      disabled={actionLoading === fund.id}
-                                      className={`p-1.5 rounded-lg transition-colors ${
-                                        fund.is_promoted 
-                                          ? 'bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20' 
-                                          : 'bg-white/5 text-text-muted hover:text-yellow-400 hover:bg-white/10'
-                                      }`}
-                                      title={fund.is_promoted ? "Promoted Fund" : "Promote Fund"}
-                                    >
-                                      <Star className={`w-4 h-4 ${fund.is_promoted ? 'fill-yellow-400' : ''}`} />
-                                    </button>
-                                    <button
-                                      onClick={() => handleEditFund(fund)}
-                                      className="px-3 py-1.5 bg-white/5 text-white hover:bg-white/10 rounded-lg text-xs font-medium transition-colors"
-                                    >
-                                      Edit
-                                    </button>
-                                    <button
-                                      onClick={() => handleToggleFundStatus(fund)}
-                                      disabled={actionLoading === fund.id}
-                                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
-                                        fund.status === 'active'
-                                          ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
-                                          : 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
-                                      }`}
-                                    >
-                                      {actionLoading === fund.id ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                      ) : (
-                                        fund.status === 'active' ? 'Hide' : 'Activate'
-                                      )}
-                                    </button>
-                                  </div>
-                                </td>
-                            </tr>
+
+                    {/* Manager Filter */}
+                    <div className="w-full md:w-64">
+                      <div className="relative">
+                        <select
+                          value={managerFilter}
+                          onChange={(e) => { setManagerFilter(e.target.value); setCurrentPage(1); }}
+                          className="w-full bg-surface border border-border rounded-lg pl-4 pr-10 py-2 text-sm text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                        >
+                          <option value="all">All Managers</option>
+                          {managers.map(manager => (
+                            <option key={manager} value={manager}>{manager}</option>
                           ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                {/* Sticky Bulk Actions Toolbar */}
-                {selectedFunds.size > 0 && (
-                  <div className="sticky bottom-6 z-40 w-full flex justify-center pointer-events-none animate-slideUp mt-4">
-                    <div className="bg-[#222] border border-white/10 shadow-2xl rounded-full px-5 py-2.5 flex items-center gap-4 backdrop-blur-xl pointer-events-auto">
-                      <span className="text-xs font-bold text-white whitespace-nowrap">
-                        <span className="text-primary text-sm mr-1">{selectedFunds.size}</span> selected
-                      </span>
-                      <div className="h-4 w-px bg-white/10"></div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleBulkAction('active')}
-                          disabled={actionLoading === 'bulk'}
-                          className="px-4 py-1.5 bg-green-500 text-black hover:bg-green-400 rounded-full text-[10px] font-bold transition-all transform hover:scale-105 disabled:opacity-50 flex items-center gap-1.5 shadow-lg shadow-green-500/20"
-                        >
-                          <Check className="w-3 h-3" strokeWidth={3} />
-                          Activate
-                        </button>
-                        <button
-                          onClick={() => handleBulkAction('inactive')}
-                          disabled={actionLoading === 'bulk'}
-                          className="px-4 py-1.5 bg-red-500 text-white hover:bg-red-600 rounded-full text-[10px] font-bold transition-all transform hover:scale-105 disabled:opacity-50 flex items-center gap-1.5 shadow-lg shadow-red-500/20"
-                        >
-                          <X className="w-3 h-3" strokeWidth={3} />
-                          Hide
-                        </button>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none" />
                       </div>
                     </div>
                   </div>
-                )}
-              </>
-            )}
+
+                  {/* Table */}
+                  {filteredFunds.length === 0 ? (
+                    <div className="text-center py-12 bg-surface border border-border rounded-xl">
+                      <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Search className="w-6 h-6 text-text-muted" />
+                      </div>
+                      <p className="text-text-muted">No funds found matching your criteria</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="bg-surface border border-border rounded-xl overflow-hidden">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-sm">
+                            <thead className="bg-[#1a1a1a] text-text-muted border-b border-border">
+                              <tr>
+                                <th className="px-4 py-2 w-10">
+                                  <button
+                                    onClick={(e) => {
+                                      const allIds = paginatedFunds.map(f => f.id);
+                                      const allSelected = allIds.every(id => selectedFunds.has(id));
+                                      
+                                      const newSelected = new Set(selectedFunds);
+                                      if (allSelected) {
+                                        allIds.forEach(id => newSelected.delete(id));
+                                      } else {
+                                        allIds.forEach(id => newSelected.add(id));
+                                      }
+                                      setSelectedFunds(newSelected);
+                                    }}
+                                    className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                                      paginatedFunds.length > 0 && paginatedFunds.every(f => selectedFunds.has(f.id))
+                                        ? 'bg-primary border-primary text-black' 
+                                        : 'border-white/20 bg-white/5 hover:border-white/40'
+                                    }`}
+                                  >
+                                    {paginatedFunds.length > 0 && paginatedFunds.every(f => selectedFunds.has(f.id)) && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                                  </button>
+                                </th>
+                                <th className="px-4 py-2 font-medium">Fund</th>
+                                <th className="px-4 py-2 font-medium">Category / Risk</th>
+                                <th className="px-4 py-2 font-medium text-center">Clicks</th>
+                                <th className="px-4 py-2 font-medium text-right">Returns</th>
+                                <th className="px-4 py-2 font-medium text-right">Min Inv / Fees</th>
+                                <th className="px-4 py-2 font-medium text-center">Status</th>
+                                <th className="px-4 py-2 font-medium text-right">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                              {paginatedFunds.map(fund => (
+                                <tr key={fund.id} className={`hover:bg-white/5 transition-colors group ${selectedFunds.has(fund.id) ? 'bg-white/5' : ''}`}>
+                                  <td className="px-4 py-2">
+                                    <button
+                                      onClick={() => handleSelectFund(fund.id)}
+                                      className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                                        selectedFunds.has(fund.id) 
+                                          ? 'bg-primary border-primary text-black' 
+                                          : 'border-white/20 bg-white/5 hover:border-white/40'
+                                      }`}
+                                    >
+                                      {selectedFunds.has(fund.id) && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                                    </button>
+                                  </td>
+                                  <td className="px-4 py-2">
+                                    <div className="flex items-center gap-3">
+                                      {fund.logo && (
+                                        <img 
+                                          src={fund.logo} 
+                                          alt={fund.name_en} 
+                                          className="w-8 h-8 rounded-lg object-cover bg-white/5"
+                                          onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'flex';
+                                          }}
+                                        />
+                                      )}
+                                      <div 
+                                        className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-xs"
+                                        style={{ display: fund.logo ? 'none' : 'flex' }}
+                                      >
+                                        {fund.name_en.substring(0, 2).toUpperCase()}
+                                      </div>
+                                      <div>
+                                        <div className="font-medium text-white">{fund.name_en}</div>
+                                        <div className="text-xs text-text-muted">{fund.manager_en}</div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-2">
+                                    <div className="text-white">{fund.category}</div>
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
+                                      fund.risk_level === 'High' || fund.risk_level === 'Very High' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                      fund.risk_level === 'Medium' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                                      'bg-green-500/10 text-green-400 border-green-500/20'
+                                    }`}>
+                                      {fund.risk_level} Risk
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                    <span className="text-white font-mono">{analytics.funds[fund.id]?.clicks || 0}</span>
+                                  </td>
+                                  <td className="px-4 py-2 text-right">
+                                    <div className={`font-medium ${fund.return_1y >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                      {fund.return_1y}% <span className="text-[10px] text-text-muted">1Y</span>
+                                    </div>
+                                    <div className={`text-xs ${fund.return_ytd >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                      {fund.return_ytd}% <span className="text-[10px] text-text-muted">YTD</span>
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-2 text-right">
+                                    <div className="text-white">{fund.min_investment?.toLocaleString()}</div>
+                                    <div className="text-xs text-text-muted">{fund.fees}% Fees</div>
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${
+                                      fund.status === 'active' 
+                                        ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                                        : 'bg-red-500/10 text-red-400 border-red-500/20'
+                                    }`}>
+                                      {fund.status === 'active' ? 'Active' : 'Hidden'}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                      <button
+                                        onClick={() => handlePromoteFund(fund)}
+                                        disabled={actionLoading === fund.id}
+                                        className={`p-1.5 rounded-lg transition-colors ${
+                                          fund.is_promoted 
+                                            ? 'bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20' 
+                                            : 'bg-white/5 text-text-muted hover:text-yellow-400 hover:bg-white/10'
+                                        }`}
+                                        title={fund.is_promoted ? "Promoted Fund" : "Promote Fund"}
+                                      >
+                                        <Star className={`w-4 h-4 ${fund.is_promoted ? 'fill-yellow-400' : ''}`} />
+                                      </button>
+                                      <button
+                                        onClick={() => handleEditFund(fund)}
+                                        className="px-3 py-1.5 bg-white/5 text-white hover:bg-white/10 rounded-lg text-xs font-medium transition-colors"
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        onClick={() => handleToggleFundStatus(fund)}
+                                        disabled={actionLoading === fund.id}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
+                                          fund.status === 'active'
+                                            ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                                            : 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
+                                        }`}
+                                      >
+                                        {actionLoading === fund.id ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                          fund.status === 'active' ? 'Hide' : 'Activate'
+                                        )}
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between border-t border-white/5 pt-2">
+                          <div className="text-sm text-text-muted">
+                            Showing <span className="text-white font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-white font-medium">{Math.min(currentPage * itemsPerPage, filteredFunds.length)}</span> of <span className="text-white font-medium">{filteredFunds.length}</span> results
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                              disabled={currentPage === 1}
+                              className="p-2 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <ChevronLeft className="w-4 h-4 text-white" />
+                            </button>
+                            <span className="text-sm text-white font-medium px-2">
+                              Page {currentPage} of {totalPages}
+                            </span>
+                            <button
+                              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                              disabled={currentPage === totalPages}
+                              className="p-2 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <ChevronRight className="w-4 h-4 text-white" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Sticky Bulk Actions Toolbar */}
+                  {selectedFunds.size > 0 && (
+                    <div className="sticky bottom-6 z-40 w-full flex justify-center pointer-events-none animate-slideUp mt-4">
+                      <div className="bg-[#222] border border-white/10 shadow-2xl rounded-full px-5 py-2.5 flex items-center gap-4 backdrop-blur-xl pointer-events-auto">
+                        <span className="text-xs font-bold text-white whitespace-nowrap">
+                          <span className="text-primary text-sm mr-1">{selectedFunds.size}</span> selected
+                        </span>
+                        <div className="h-4 w-px bg-white/10"></div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleBulkAction('active')}
+                            disabled={actionLoading === 'bulk'}
+                            className="px-4 py-1.5 bg-green-500 text-black hover:bg-green-400 rounded-full text-[10px] font-bold transition-all transform hover:scale-105 disabled:opacity-50 flex items-center gap-1.5 shadow-lg shadow-green-500/20"
+                          >
+                            <Check className="w-3 h-3" strokeWidth={3} />
+                            Activate
+                          </button>
+                          <button
+                            onClick={() => handleBulkAction('hidden')}
+                            disabled={actionLoading === 'bulk'}
+                            className="px-4 py-1.5 bg-red-500 text-white hover:bg-red-600 rounded-full text-[10px] font-bold transition-all transform hover:scale-105 disabled:opacity-50 flex items-center gap-1.5 shadow-lg shadow-red-500/20"
+                          >
+                            <X className="w-3 h-3" strokeWidth={3} />
+                            Hide
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             {activeTab === 'ads' && (
               <>
@@ -1881,6 +2204,16 @@ const AdminDashboard = ({ initialTab = 'submissions' }) => {
                 </div>
               </div>
             )}
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+              isOpen={modalConfig.isOpen && !['edit_fund', 'edit_ad', 'approve', 'reject'].includes(modalConfig.type)}
+              onClose={() => setModalConfig({ isOpen: false, type: null, data: null })}
+              onConfirm={modalConfig.onConfirm}
+              title={modalConfig.title}
+              message={modalConfig.message}
+              type={modalConfig.type}
+              confirmText={modalConfig.confirmText}
+            />
     </div>
   );
 };

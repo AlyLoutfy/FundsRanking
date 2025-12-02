@@ -84,6 +84,7 @@ export const translations = {
     category: "Category",
     riskLevel: "Risk Level",
     submitFundBtn: "Submit Fund",
+    submissionSuccess: "Fund submitted successfully! We will review it shortly.",
     
     // Placeholders
     phName: "e.g. CIB Growth Fund",
@@ -109,9 +110,9 @@ export const translations = {
     slotsLeft: "4 Left",
     pricing: "Pricing",
     pricingDesc1: "Pay a ",
-    pricingDesc2: "10,000 EGP monthly fee",
+    pricingDesc2: "{price} {currency} monthly fee",
     pricingDesc3: " to display your ad. This ensures high visibility for your brand.",
-    price: "10,000 EGP",
+    price: "{price} {currency}",
     perMonth: "/month",
     companyName: "Company Name",
     emailAddress: "Email Address",
@@ -206,6 +207,7 @@ export const translations = {
     category: "الفئة",
     riskLevel: "مستوى المخاطرة",
     submitFundBtn: "إرسال الصندوق",
+    submissionSuccess: "تم إرسال الصندوق بنجاح! سنقوم بمراجعته قريباً.",
     
     // Placeholders
     phName: "مثال: صندوق نمو CIB",
@@ -231,9 +233,9 @@ export const translations = {
     slotsLeft: "4 متبقية",
     pricing: "التسعير",
     pricingDesc1: "ادفع ",
-    pricingDesc2: "10,000 جنيه شهريًا",
+    pricingDesc2: "رسوم شهرية قدرها {price} {currency}",
     pricingDesc3: " لعرض إعلانك. هذا يضمن رؤية عالية لعلامتك التجارية.",
-    price: "10,000 جنيه",
+    price: "{price} {currency}",
     perMonth: "/شهر",
     companyName: "اسم الشركة",
     emailAddress: "البريد الإلكتروني",

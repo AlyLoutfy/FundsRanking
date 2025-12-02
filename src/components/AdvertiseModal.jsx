@@ -6,6 +6,7 @@ import { useSwipeToClose } from '../hooks/useSwipeToClose';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../lib/supabase';
 import { useToast } from '../context/ToastContext';
+import { useSettings } from '../hooks/useSettings';
 import AdSpace from './AdSpace';
 
 const AdvertiseModal = ({ isOpen, onClose }) => {
@@ -18,7 +19,28 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
   const { handlers: swipeHandlers, style: swipeStyle, isDragging: isSwiping } = useSwipeToClose(onClose, 100, isOpen);
   const { t } = useLanguage();
   const { showToast } = useToast();
+  const { settings } = useSettings();
   const fileInputRef = useRef(null);
+
+  const adPrice = settings?.ad_price || { amount: 10000, currency: 'EGP' };
+  const formattedPrice = new Intl.NumberFormat('en-US').format(adPrice.amount);
+
+  const [activeAdsCount, setActiveAdsCount] = useState(0);
+  const TOTAL_SLOTS = 4;
+
+  useEffect(() => {
+    const fetchActiveAds = async () => {
+      const { count } = await supabase
+        .from('ads')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+      setActiveAdsCount(count || 0);
+    };
+
+    if (isOpen) {
+      fetchActiveAds();
+    }
+  }, [isOpen]);
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -173,7 +195,17 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
           {...swipeHandlers}
           className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-[#333] bg-[#1a1a1a] touch-none cursor-grab active:cursor-grabbing"
         >
-          <h3 className="text-base md:text-lg font-bold text-white font-display">{t('advertiseTitle')}</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-base md:text-lg font-bold text-white font-display">{t('advertiseTitle')}</h3>
+            <div className={clsx(
+              "px-2 py-0.5 rounded-full text-[10px] font-bold border",
+              (TOTAL_SLOTS - activeAdsCount) > 0 
+                ? "bg-green-500/10 text-green-400 border-green-500/20" 
+                : "bg-red-500/10 text-red-400 border-red-500/20"
+            )}>
+              {(TOTAL_SLOTS - activeAdsCount) > 0 ? `${TOTAL_SLOTS - activeAdsCount} Slots Left` : 'Sold Out'}
+            </div>
+          </div>
           <button 
             onClick={onClose}
             className="p-1.5 md:p-2 hover:bg-[#333] rounded-full transition-colors text-text-muted hover:text-white"
@@ -186,6 +218,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Left Column: Form */}
             <div className="space-y-6">
+
 
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -279,7 +312,19 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
             </div>
 
             {/* Right Column: Preview */}
-            <div className="hidden md:flex flex-col">
+            <div className="space-y-6">
+                <div className="bg-surface border border-border rounded-xl p-4">
+                    <h4 className="text-sm font-bold text-white mb-1">{t('pricing')}</h4>
+                    <p className="text-xs text-text-muted">
+                        {t('pricingDesc1')}
+                        <span className="text-primary font-bold">
+                            {t('pricingDesc2', { price: formattedPrice, currency: adPrice.currency })}
+                        </span>
+                        {t('pricingDesc3')}
+                    </p>
+                </div>
+
+              <div className="sticky top-6">
                 <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
                     <Megaphone className="w-4 h-4 text-primary" />
                     Live Preview
@@ -306,6 +351,7 @@ const AdvertiseModal = ({ isOpen, onClose }) => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

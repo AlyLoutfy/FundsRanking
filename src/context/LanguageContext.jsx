@@ -12,7 +12,7 @@ export const LanguageProvider = ({ children }) => {
     document.documentElement.lang = language;
   }, [language]);
 
-  const t = (key) => {
+  const t = (key, params = {}) => {
     const keys = key.split('.');
     let value = translations[language];
     
@@ -22,6 +22,13 @@ export const LanguageProvider = ({ children }) => {
       } else {
         return key; // Return key if translation not found
       }
+    }
+    
+    // Replace placeholders with params
+    if (typeof value === 'string' && Object.keys(params).length > 0) {
+      Object.keys(params).forEach(param => {
+        value = value.replace(`{${param}}`, params[param]);
+      });
     }
     
     return value;

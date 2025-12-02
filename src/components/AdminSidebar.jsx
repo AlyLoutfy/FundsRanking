@@ -15,7 +15,7 @@ import { supabase } from '../lib/supabase';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const AdminSidebar = ({ isCollapsed, toggleSidebar }) => {
+const AdminSidebar = ({ isCollapsed, toggleSidebar, counts }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -25,10 +25,34 @@ const AdminSidebar = ({ isCollapsed, toggleSidebar }) => {
 
   const navItems = [
     { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Overview' },
-    { path: '/admin/fund-requests', icon: FileText, label: 'Fund Requests' },
-    { path: '/admin/funds', icon: Database, label: 'Live Funds' },
-    { path: '/admin/ad-requests', icon: Megaphone, label: 'Ad Requests' },
-    { path: '/admin/ads', icon: MonitorPlay, label: 'Live Ads' },
+    { 
+      path: '/admin/fund-requests', 
+      icon: FileText, 
+      label: 'Fund Requests',
+      count: counts?.fundRequests,
+      badgeColor: 'bg-yellow-500/20 text-yellow-400'
+    },
+    { 
+      path: '/admin/funds', 
+      icon: Database, 
+      label: 'Live Funds',
+      count: counts?.liveFunds,
+      badgeColor: 'bg-green-500/20 text-green-400'
+    },
+    { 
+      path: '/admin/ad-requests', 
+      icon: Megaphone, 
+      label: 'Ad Requests',
+      count: counts?.adRequests,
+      badgeColor: 'bg-yellow-500/20 text-yellow-400'
+    },
+    { 
+      path: '/admin/ads', 
+      icon: MonitorPlay, 
+      label: 'Live Ads',
+      count: counts?.liveAds,
+      badgeColor: 'bg-green-500/20 text-green-400'
+    },
     { path: '/admin/logs', icon: Activity, label: 'Audit Logs' },
   ];
 
@@ -67,19 +91,42 @@ const AdminSidebar = ({ isCollapsed, toggleSidebar }) => {
               ${isCollapsed ? 'justify-center' : ''}
             `}
           >
-            <item.icon className="w-4 h-4 shrink-0" />
-            
-            <span className={`text-xs font-medium whitespace-nowrap transition-all duration-200 ${
-              isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 ml-3'
-            }`}>
-              {item.label}
-            </span>
+            {({ isActive }) => (
+              <>
+                <item.icon className="w-4 h-4 shrink-0" />
+                
+                <span className={`text-xs font-medium whitespace-nowrap transition-all duration-200 flex-1 ${
+                  isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 ml-3'
+                }`}>
+                  {item.label}
+                </span>
 
-            {/* Tooltip */}
-            {isCollapsed && (
-              <div className="absolute left-full ml-4 px-3 py-1.5 bg-[#1a1a1a] text-white text-xs font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-all duration-200 shadow-xl translate-x-2 group-hover:translate-x-0">
-                {item.label}
-              </div>
+                {/* Badge */}
+                {item.count !== undefined && item.count > 0 && (
+                  <span className={`
+                    text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2 transition-all duration-200
+                    ${isActive 
+                      ? 'bg-black/20 text-black' 
+                      : item.badgeColor
+                    }
+                    ${isCollapsed ? 'absolute top-1 right-1 w-2 h-2 p-0 rounded-full min-w-0' : ''}
+                  `}>
+                    {!isCollapsed && item.count}
+                  </span>
+                )}
+
+                {/* Tooltip */}
+                {isCollapsed && (
+                  <div className="absolute left-full ml-4 px-3 py-1.5 bg-[#1a1a1a] text-white text-xs font-medium rounded-md border border-white/10 opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-all duration-200 shadow-xl translate-x-2 group-hover:translate-x-0 flex items-center gap-2">
+                    {item.label}
+                    {item.count !== undefined && item.count > 0 && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${item.badgeColor}`}>
+                        {item.count}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </NavLink>
         ))}

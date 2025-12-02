@@ -47,6 +47,19 @@ export function useFunds() {
     }
 
     fetchFunds();
+
+    // Real-time subscription
+    const subscription = supabase
+      .channel('public:funds')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'funds' }, (payload) => {
+        console.log('Real-time update received:', payload);
+        fetchFunds();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, [language]);
 
   return { funds, loading, error };

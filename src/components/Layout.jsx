@@ -196,7 +196,7 @@ const Layout = ({ children, onOpenSubmitModal }) => {
                     <p>{t('footerDisclaimer3')}</p>
                   </div>
                   <div className="text-[10px] font-mono opacity-30 pt-2">
-                    v 3.0.0
+                    v 3.1.0
                   </div>
                 </div>
 
