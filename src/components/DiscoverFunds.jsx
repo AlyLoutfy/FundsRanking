@@ -2,45 +2,29 @@ import React from 'react';
 import { Compass, Info } from 'lucide-react';
 import clsx from 'clsx';
 import { useLanguage } from '../context/LanguageContext';
+import { trackEvent } from '../lib/analytics';
 
 const DiscoverFunds = ({ funds, onFundClick }) => {
   const { t } = useLanguage();
-  // Mock sponsored funds data
-  const sponsoredFunds = [
-    {
-      id: 's1',
-      name: "Goldman Sachs Egypt Equity",
-      manager: "Goldman Sachs",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Goldman_Sachs.svg/1200px-Goldman_Sachs.svg.png",
-      annualReturn: 28.4,
-      ytdReturn: 12.3,
-      category: "Equity",
-      risk: "High",
-      description: "Exclusive access to top-tier Egyptian equities managed by global experts.",
-      strategy: "High-conviction global-local hybrid strategy.",
-      minInvestment: "50,000 EGP",
-      fees: "2.0%",
-      isSponsored: true
-    },
-    {
-      id: 's2',
-      name: "BlackRock MENA Fund",
-      manager: "BlackRock",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/BlackRock_logo.svg/1200px-BlackRock_logo.svg.png",
-      annualReturn: 26.9,
-      category: "Mixed",
-      risk: "Medium",
-      description: "A diversified portfolio across the MENA region with a focus on Egyptian growth sectors.",
-      strategy: "Regional diversification.",
-      minInvestment: "100,000 EGP",
-      fees: "1.8%",
-      isSponsored: true
-    }
-  ];
+  
+  const handleFundClick = (fund) => {
+    trackEvent('fund_click', 'fund', fund.id, { fund_name: fund.name, source: 'featured' });
+    onFundClick(fund);
+  };
 
-  // Get 1 sponsored fund and 4 new funds
-  const displaySponsored = sponsoredFunds.slice(0, 1);
-  const displayNew = [...funds].slice(-4).reverse().map(f => ({ ...f, isNew: true }));
+  // Find promoted fund from DB
+  const promotedFund = funds.find(f => f.is_promoted);
+  
+  const displaySponsored = promotedFund ? [{ ...promotedFund, isSponsored: true }] : [];
+  
+  // Always show 5 funds total
+  const newFundsCount = 5 - displaySponsored.length;
+  
+  const displayNew = [...funds]
+    .filter(f => !f.is_promoted) // Exclude promoted fund from new list
+    .slice(-newFundsCount)
+    .reverse()
+    .map(f => ({ ...f, isNew: true }));
 
   const allFunds = [...displaySponsored, ...displayNew];
 
@@ -102,7 +86,7 @@ const DiscoverFunds = ({ funds, onFundClick }) => {
             )}
 
             <div 
-              onClick={() => onFundClick(fund)}
+              onClick={() => handleFundClick(fund)}
               className={clsx(
                 "relative rounded-xl transition-all duration-300 hover:shadow-lg flex flex-col min-h-[120px] h-full hover:z-10 cursor-pointer overflow-hidden",
                 fund.isSponsored ? "p-[1px]" : "bg-[#111] border border-[#222] hover:border-primary/50 hover:shadow-primary/5 hover:bg-[#1a1a1a]"
@@ -121,18 +105,31 @@ const DiscoverFunds = ({ funds, onFundClick }) => {
   
                 {/* Content Row: Logo & Name */}
                 <div className="flex items-start gap-3 mb-2 flex-1">
-                <img 
-                  src={fund.logo} 
-                  alt={fund.manager} 
+                {fund.logo ? (
+                  <img 
+                    src={fund.logo} 
+                    alt={fund.manager} 
+                    className={clsx(
+                      "w-9 h-9 rounded-lg object-contain shadow-sm shrink-0 transition-opacity",
+                      fund.isSponsored ? "bg-white p-0.5 opacity-100" : "bg-white p-0.5 opacity-90 group-hover:opacity-100"
+                    )}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div 
                   className={clsx(
-                    "w-9 h-9 rounded-lg object-contain shadow-sm shrink-0 transition-opacity",
-                    fund.isSponsored ? "bg-white p-0.5 opacity-100" : "object-cover opacity-90 group-hover:opacity-100"
+                    "w-9 h-9 rounded-lg bg-gradient-to-br from-gray-800 to-gray-900 border border-[#333] flex items-center justify-center shadow-sm shrink-0 transition-opacity",
+                    fund.isSponsored ? "opacity-100" : "opacity-90 group-hover:opacity-100"
                   )}
-                  onError={(e) => {
-                    e.target.onerror = null; 
-                    e.target.src = getLetterAvatar(fund.manager);
-                  }}
-                />
+                  style={{ display: fund.logo ? 'none' : 'flex' }}
+                >
+                  <span className="text-xs font-bold text-white/80">
+                    {fund.manager.substring(0, 2).toUpperCase()}
+                  </span>
+                </div>
                 <div className="min-w-0 pt-0.5">
                   <h3 
                     className={clsx(

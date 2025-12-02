@@ -14,7 +14,8 @@ export function useFunds() {
         const { data, error } = await supabase
           .from('funds')
           .select('*')
-          .eq('status', 'active');
+          .eq('status', 'active')
+          .order('created_at', { ascending: true });
 
         if (error) throw error;
 
@@ -30,8 +31,8 @@ export function useFunds() {
           risk: fund.risk_level,
           description: language === 'ar' ? (fund.description_ar || fund.description_en) : fund.description_en,
           strategy: language === 'ar' ? (fund.strategy_ar || fund.strategy_en) : fund.strategy_en,
-          minInvestment: fund.min_investment, // Need to format this?
-          fees: fund.fees + '%', // DB stores number, UI expects string with %?
+          minInvestment: fund.min_investment || 0, // Ensure number
+          fees: (fund.fees || 0) + '%', // Ensure string
           // Keep original DB fields if needed
           ...fund
         }));

@@ -1,20 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Megaphone, Globe } from 'lucide-react';
 import clsx from 'clsx';
 import AdSpace from './AdSpace';
 import AdvertiseModal from './AdvertiseModal';
 import cibLogo from '../assets/cib.png';
 import { useLanguage } from '../context/LanguageContext';
+import { supabase } from '../lib/supabase';
 
 const Layout = ({ children, onOpenSubmitModal }) => {
   const [isAdvertiseModalOpen, setIsAdvertiseModalOpen] = useState(false);
   const [startMarquee, setStartMarquee] = useState(false);
+  const [ads, setAds] = useState([]);
   const { t, language, toggleLanguage, isTransitioning } = useLanguage();
 
   const CIB_AD_TEXT = "Delivering value to our clients, our community and our shareholders";
 
+  // Fetch active ads
+  useEffect(() => {
+    const fetchAds = async () => {
+      const { data } = await supabase
+        .from('ads')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+      
+      if (data) {
+        setAds(data);
+      }
+    };
+    fetchAds();
+  }, []);
+
+  // Combine hardcoded CIB ad with dynamic ads
+  const displayAds = [
+    { id: 'cib', company_name: 'CIB', text_en: CIB_AD_TEXT, image_url: cibLogo, link: 'https://cibeg.com' },
+    ...ads
+  ];
+
   // Start marquee after 3 seconds
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       setStartMarquee(true);
     }, 3000);
@@ -22,7 +46,7 @@ const Layout = ({ children, onOpenSubmitModal }) => {
   }, []);
 
   // Handle Escape key
-  React.useEffect(() => {
+  useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape') {
         setIsAdvertiseModalOpen(false);
@@ -31,6 +55,13 @@ const Layout = ({ children, onOpenSubmitModal }) => {
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
+
+  const [imageErrors, setImageErrors] = useState({});
+
+  const getAdText = (ad) => {
+    const text = language === 'ar' && ad.text_ar ? ad.text_ar : ad.text_en;
+    return text || ad.company_name;
+  };
 
   return (
     <div className="min-h-screen bg-background text-text font-sans selection:bg-primary/30 relative">
@@ -41,40 +72,63 @@ const Layout = ({ children, onOpenSubmitModal }) => {
       
       {/* Mobile Ad Carousel (Visible on small screens) */}
       <div className="lg:hidden w-full bg-surface border-b border-border h-14 flex items-center overflow-hidden relative">
-        {/* Track - width must be large enough to hold all items. 
-            We use w-max to let it expand based on content. 
-            We have 2 sets of items. Animation moves from -50% (start of 2nd set) to 0% (start of 1st set).
-        */}
         <div className={clsx(
           "flex items-center gap-3 whitespace-nowrap absolute left-0 w-max hover:pause pl-4",
           startMarquee ? "animate-marquee-left" : ""
         )}>
           {/* Set 1 */}
-          <div className="inline-flex items-center gap-2 px-4 h-10 bg-background border border-border rounded-lg text-xs text-text-muted font-medium shrink-0">
-            <img src={cibLogo} alt="CIB" className="h-6 w-auto object-contain" />
-            <span className="max-w-[200px] truncate">{CIB_AD_TEXT}</span>
-          </div>
-          {[...Array(14)].map((_, i) => (
-            <div key={`set1-${i}`} className="inline-flex items-center gap-2 px-4 h-10 bg-background border border-border rounded-lg text-xs text-text-muted font-medium shrink-0">
-              <div className="w-2 h-2 rounded-full bg-primary/50"></div>
-              Ad Content {i + 1}
+          {displayAds.map((ad, i) => (
+            <div key={`mobile-ad-1-${ad.id || i}`} className="inline-flex items-center gap-2 px-4 h-10 bg-background border border-border rounded-lg text-xs text-gray-300 font-medium shrink-0">
+              {ad.image_url && !imageErrors[`1-${ad.id || i}`] ? (
+                <img 
+                  src={ad.image_url} 
+                  alt={ad.company_name} 
+                  className="h-6 w-auto object-contain" 
+                  onError={() => setImageErrors(prev => ({ ...prev, [`1-${ad.id || i}`]: true }))}
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] text-primary font-bold uppercase">
+                  {ad.company_name?.[0] || '?'}
+                </div>
+              )}
+              <span className="max-w-[200px] truncate">{getAdText(ad)}</span>
             </div>
           ))}
-          {/* Set 2 (Duplicate) */}
-          <div className="inline-flex items-center gap-2 px-4 h-10 bg-background border border-border rounded-lg text-xs text-text-muted font-medium shrink-0">
-            <img src={cibLogo} alt="CIB" className="h-6 w-auto object-contain" />
-            <span className="max-w-[200px] truncate">{CIB_AD_TEXT}</span>
-          </div>
-          {[...Array(14)].map((_, i) => (
-            <div key={`set2-${i}`} className="inline-flex items-center gap-2 px-4 h-10 bg-background border border-border rounded-lg text-xs text-text-muted font-medium shrink-0">
-              <div className="w-2 h-2 rounded-full bg-primary/50"></div>
-              Ad Content {i + 1}
+          
+          {/* Fill with placeholders if not enough ads */}
+          {displayAds.length < 5 && [...Array(5 - displayAds.length)].map((_, i) => (
+             <div key={`mobile-placeholder-1-${i}`} className="inline-flex items-center gap-2 px-4 h-10 bg-background border border-border rounded-lg text-xs text-text-muted font-medium shrink-0 opacity-50">
+               <div className="w-2 h-2 rounded-full bg-primary/50"></div>
+               Advertise Here
+             </div>
+          ))}
+
+          {/* Set 2 (Duplicate for infinite scroll) */}
+          {displayAds.map((ad, i) => (
+            <div key={`mobile-ad-2-${ad.id || i}`} className="inline-flex items-center gap-2 px-4 h-10 bg-background border border-border rounded-lg text-xs text-gray-300 font-medium shrink-0">
+              {ad.image_url && !imageErrors[`2-${ad.id || i}`] ? (
+                <img 
+                  src={ad.image_url} 
+                  alt={ad.company_name} 
+                  className="h-6 w-auto object-contain" 
+                  onError={() => setImageErrors(prev => ({ ...prev, [`2-${ad.id || i}`]: true }))}
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] text-primary font-bold uppercase">
+                  {ad.company_name?.[0] || '?'}
+                </div>
+              )}
+              <span className="max-w-[200px] truncate">{getAdText(ad)}</span>
             </div>
+          ))}
+           {displayAds.length < 5 && [...Array(5 - displayAds.length)].map((_, i) => (
+             <div key={`mobile-placeholder-2-${i}`} className="inline-flex items-center gap-2 px-4 h-10 bg-background border border-border rounded-lg text-xs text-text-muted font-medium shrink-0 opacity-50">
+               <div className="w-2 h-2 rounded-full bg-primary/50"></div>
+               Advertise Here
+             </div>
           ))}
         </div>
       </div>
-
-
 
       <div className={clsx(
         "max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 transition-opacity duration-300",
@@ -173,11 +227,20 @@ const Layout = ({ children, onOpenSubmitModal }) => {
           {/* Right Sidebar (Ads) - Sticky & Full Height (No Scroll) - Hidden on Mobile */}
           <div className="hidden lg:flex lg:col-span-2 sticky top-4 h-[calc(100vh-2rem)] flex-col pb-0">
             <div className="flex-1 flex flex-col gap-3 min-h-0">
-              <AdSpace className="flex-1 min-h-0" image={cibLogo} text={CIB_AD_TEXT} />
-              <AdSpace className="flex-1 min-h-0" />
-              <AdSpace className="flex-1 min-h-0" />
-              <AdSpace className="flex-1 min-h-0" />
-              <AdSpace className="flex-1 min-h-0" />
+              {/* Render up to 5 ads */}
+              {[...Array(5)].map((_, i) => {
+                const ad = displayAds[i];
+                return (
+                  <AdSpace 
+                    key={ad?.id || `placeholder-${i}`} 
+                    className="flex-1 min-h-0" 
+                    image={ad?.image_url} 
+                    text={language === 'ar' && ad?.text_ar ? ad.text_ar : ad?.text_en}
+                    link={ad?.link}
+                    id={ad?.id}
+                  />
+                );
+              })}
             </div>
             
             <button 

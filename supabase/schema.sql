@@ -8,6 +8,9 @@ create table public.funds (
   name_ar text not null,
   manager_en text,
   manager_ar text,
+  logo text,
+  description_en text,
+  description_ar text,
   category text,
   risk_level text, -- 'low', 'medium', 'high'
   nav numeric,
@@ -29,6 +32,7 @@ create table public.funds (
 create table public.ads (
   id uuid default uuid_generate_v4() primary key,
   company_name text not null,
+  email text,
   image_url text,
   link_url text,
   text_en text,
@@ -47,7 +51,16 @@ create table public.fund_submissions (
   fund_name text not null,
   description text,
   contact_email text,
+  category text,
+  risk_level text,
+  return_1y numeric,
+  min_investment numeric,
+  fees numeric,
+  strategy text,
+  manager text,
   status text default 'pending', -- 'pending', 'reviewed'
+  processed_by_email text,
+  processed_at timestamp with time zone,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -88,3 +101,92 @@ create policy "Public can submit funds"
 create policy "Admins can view submissions"
   on public.fund_submissions for select
   using ( auth.role() = 'authenticated' );
+
+-- ==========================================
+-- CONSOLIDATED MIGRATIONS (02, 03, 04)
+-- ==========================================
+
+-- 1. Profiles Table & Security (from 02_admin_security.sql & 03_fix_rls_recursion.sql)
+create table public.profiles (
+  id uuid references auth.users not null primary key,
+  role text default 'user',
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.profiles enable row level security;
+
+-- Secure function to check admin status (bypasses recursion)
+create or replace function public.is_admin()
+returns boolean as $$
+begin
+  return exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'admin'
+  );
+end;
+$$ language plpgsql security definer;
+
+-- Profiles Policies
+create policy "Users can view own profile"
+  on public.profiles for select
+  using ( auth.uid() = id );
+
+create policy "Admins can view all profiles"
+  on public.profiles for select
+  using ( public.is_admin() );
+
+-- Trigger for new users
+create or replace function public.handle_new_user() 
+returns trigger as $$
+begin
+  insert into public.profiles (id, role)
+  values (new.id, 'user');
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+-- 2. Update Submissions Schema (from 04_update_submissions_schema.sql)
+-- (We update the table definition directly above instead of altering it here)
+
+-- 3. Update RLS Policies to use is_admin() (Replacing previous admin policies)
+
+-- Funds
+drop policy if exists "Admins can do everything on funds" on public.funds;
+create policy "Admins can insert funds" on public.funds for insert with check ( public.is_admin() );
+create policy "Admins can update funds" on public.funds for update using ( public.is_admin() );
+create policy "Admins can delete funds" on public.funds for delete using ( public.is_admin() );
+
+-- Ads
+drop policy if exists "Admins can do everything on ads" on public.ads;
+create policy "Admins can insert ads" on public.ads for insert with check ( public.is_admin() );
+create policy "Admins can update ads" on public.ads for update using ( public.is_admin() );
+create policy "Admins can delete ads" on public.ads for delete using ( public.is_admin() );
+create policy "Admins can view all ads" on public.ads for select using ( public.is_admin() );
+create policy "Public can submit ads" on public.ads for insert with check ( true );
+
+-- Submissions
+drop policy if exists "Admins can view submissions" on public.fund_submissions;
+create policy "Admins can view submissions" on public.fund_submissions for select using ( public.is_admin() );
+create policy "Admins can update submissions" on public.fund_submissions for update using ( public.is_admin() );
+
+-- Audit Logs
+create table public.admin_logs (
+  id uuid default uuid_generate_v4() primary key,
+  admin_id uuid references auth.users not null,
+  admin_email text,
+  action text not null,
+  target_type text not null,
+  target_id uuid not null,
+  details jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.admin_logs enable row level security;
+
+create policy "Admins can view audit logs" on public.admin_logs for select using ( public.is_admin() );
+create policy "Admins can insert audit logs" on public.admin_logs for insert with check ( public.is_admin() );
+

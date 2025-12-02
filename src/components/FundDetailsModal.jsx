@@ -46,15 +46,25 @@ const FundHeader = ({ fund, onCloseAction, canClose }) => {
         <X className="w-4 h-4" />
       </button>
     )}
-    <img 
-      src={fund.logo} 
-      alt={fund.name} 
-      className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-contain bg-white p-1 shadow-lg shrink-0"
-      onError={(e) => {
-        e.target.onerror = null; 
-        e.target.src = `https://ui-avatars.com/api/?name=${fund.manager}&background=random&color=fff&size=64`;
-      }}
-    />
+    {fund.logo ? (
+      <img 
+        src={fund.logo} 
+        alt={fund.name} 
+        className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-contain bg-white p-1 shadow-lg shrink-0"
+        onError={(e) => {
+          e.target.style.display = 'none';
+          e.target.nextSibling.style.display = 'flex';
+        }}
+      />
+    ) : null}
+    <div 
+      className="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-[#333] flex items-center justify-center shadow-lg shrink-0"
+      style={{ display: fund.logo ? 'none' : 'flex' }}
+    >
+      <span className="text-lg md:text-xl font-bold text-white/80">
+        {fund.name.substring(0, 2).toUpperCase()}
+      </span>
+    </div>
     <div className="min-w-0 flex-1">
       <div className="flex items-center gap-2 mb-1">
         <h2 className="text-lg md:text-xl font-bold text-white leading-tight line-clamp-2">{fund.name}</h2>
@@ -70,7 +80,7 @@ const FundHeader = ({ fund, onCloseAction, canClose }) => {
           fund.risk === 'Medium' ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" : 
           "bg-green-500/10 text-green-400 border-green-500/20"
         )}>
-          {t(getRiskKey(fund.risk))} {t('risk')}
+          {t(getRiskKey(fund.risk))}
         </span>
       </div>
     </div>
@@ -406,15 +416,25 @@ const FundDetailsModal = ({ isOpen, onClose, fund, allFunds = [] }) => {
                             onClick={() => handleSelectComparison(f)}
                             className="w-full flex items-center gap-3 p-2 hover:bg-[#2a2a2a] rounded-lg transition-colors text-left group mb-1 rtl:text-right"
                           >
-                            <img 
-                              src={f.logo} 
-                              alt={f.name} 
-                              className="w-8 h-8 rounded-lg object-cover border border-[#333] shadow-sm group-hover:border-[#444] transition-colors"
-                              onError={(e) => {
-                                e.target.onerror = null; 
-                                e.target.src = `https://ui-avatars.com/api/?name=${f.manager}&background=random&color=fff&size=64`;
-                              }}
-                            />
+                            {f.logo ? (
+                              <img 
+                                src={f.logo} 
+                                alt={f.name} 
+                                className="w-8 h-8 rounded-lg object-cover border border-[#333] shadow-sm group-hover:border-[#444] transition-colors"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div 
+                              className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-800 to-gray-900 border border-[#333] flex items-center justify-center shadow-sm group-hover:border-[#444] transition-colors"
+                              style={{ display: f.logo ? 'none' : 'flex' }}
+                            >
+                              <span className="text-[10px] font-bold text-white/80">
+                                {f.name.substring(0, 2).toUpperCase()}
+                              </span>
+                            </div>
                             <div className="flex-1 min-w-0">
                               <div className="text-sm font-medium text-white group-hover:text-primary truncate">{f.name}</div>
                               <div className="text-[10px] text-text-muted">{f.manager}</div>

@@ -2,9 +2,15 @@ import React from 'react';
 import clsx from 'clsx';
 import { Info } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { trackEvent } from '../lib/analytics';
 
 const FundRow = ({ rank, fund, onClick }) => {
   const { t } = useLanguage();
+  
+  const handleClick = () => {
+    trackEvent('fund_click', 'fund', fund.id, { fund_name: fund.name });
+    onClick();
+  };
   
   const getCategoryKey = (category) => {
     const map = {
@@ -38,7 +44,7 @@ const FundRow = ({ rank, fund, onClick }) => {
 
   return (
     <div 
-      onClick={onClick}
+      onClick={handleClick}
       className="group relative hover:z-50 cursor-pointer transition-all duration-200
         /* Mobile: Card Style */
         flex flex-col p-3 md:p-4 border-b border-[#222] bg-[#111] hover:bg-[#161616]
@@ -61,17 +67,25 @@ const FundRow = ({ rank, fund, onClick }) => {
 
         {/* Fund Info (Logo + Name) */}
         <div className="flex-1 flex items-center gap-2 md:gap-3 md:col-span-5 md:pl-2 min-w-0">
-          <div className="relative shrink-0">
-            <img 
-              src={fund.logo} 
-              alt={fund.name} 
-              className="w-9 h-9 md:w-8 md:h-8 rounded-lg object-cover border border-[#333] shadow-sm group-hover:border-[#444] transition-colors"
-              onError={(e) => {
-                e.target.onerror = null; 
-                e.target.src = `https://ui-avatars.com/api/?name=${fund.manager}&background=random&color=fff&size=64`;
-              }}
-            />
-          </div>
+            {fund.logo ? (
+              <img 
+                src={fund.logo} 
+                alt={fund.name} 
+                className="w-9 h-9 md:w-8 md:h-8 rounded-lg object-contain bg-white p-0.5 border border-[#333] shadow-sm group-hover:border-[#444] transition-colors"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div 
+              className="w-9 h-9 md:w-8 md:h-8 rounded-lg bg-gradient-to-br from-gray-800 to-gray-900 border border-[#333] flex items-center justify-center shadow-sm group-hover:border-[#444] transition-colors"
+              style={{ display: fund.logo ? 'none' : 'flex' }}
+            >
+              <span className="text-xs font-bold text-white/80">
+                {fund.name.substring(0, 2).toUpperCase()}
+              </span>
+            </div>
           <div className="flex flex-col justify-center min-w-0 w-full">
             <div className="flex items-center gap-2">
               <h3 className="text-white font-bold text-sm leading-tight group-hover:text-primary transition-colors truncate">
@@ -89,7 +103,7 @@ const FundRow = ({ rank, fund, onClick }) => {
               <span className={clsx(
                 fund.risk === "High" ? "text-red-400" : 
                 fund.risk === "Medium" ? "text-yellow-400" : "text-green-400"
-              )}>{t(getRiskKey(fund.risk))} {t('risk')}</span>
+              )}>{t(getRiskKey(fund.risk))}</span>
             </p>
           </div>
         </div>

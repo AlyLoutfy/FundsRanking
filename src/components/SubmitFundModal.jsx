@@ -4,8 +4,10 @@ import clsx from 'clsx';
 import { useMobileOverscroll } from '../hooks/useMobileOverscroll';
 import { useSwipeToClose } from '../hooks/useSwipeToClose';
 import { useLanguage } from '../context/LanguageContext';
+import { supabase } from '../lib/supabase';
+import { useToast } from '../context/ToastContext';
 
-const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
+const SubmitFundModal = ({ isOpen, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   
@@ -13,9 +15,11 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
   const { handlers: overscrollHandlers, style: overscrollStyle } = useMobileOverscroll(scrollRef, isOpen);
   const { handlers: swipeHandlers, style: swipeStyle, isDragging: isSwiping } = useSwipeToClose(onClose, 100, isOpen);
   const { t } = useLanguage();
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
     name: '',
+    manager: '',
     category: 'Equity',
     annualReturn: '',
     risk: 'Medium',
@@ -72,20 +76,45 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
     onClose();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
-    handleClose();
-    setFormData({ 
-      name: '', 
-      category: 'Equity', 
-      annualReturn: '', 
-      risk: 'Medium',
-      description: '',
-      strategy: '',
-      minInvestment: '',
-      fees: ''
-    });
+    
+    try {
+      const { error } = await supabase
+        .from('fund_submissions')
+        .insert([{
+          fund_name: formData.name,
+          manager: formData.manager,
+          description: formData.description,
+          category: formData.category,
+          risk_level: formData.risk,
+          return_1y: parseFloat(formData.annualReturn) || 0,
+          min_investment: parseFloat(formData.minInvestment) || 0,
+          fees: parseFloat(formData.fees) || 0,
+          strategy: formData.strategy,
+          contact_email: 'pending@example.com',
+          status: 'pending'
+        }]);
+
+      if (error) throw error;
+
+      showToast(t('submissionSuccess') || 'Fund submitted successfully!', 'success');
+      handleClose();
+      setFormData({ 
+        name: '', 
+        manager: '',
+        category: 'Equity', 
+        annualReturn: '', 
+        risk: 'Medium',
+        description: '',
+        strategy: '',
+        minInvestment: '',
+        fees: ''
+      });
+    } catch (error) {
+      console.error('Error submitting fund:', error);
+      showToast('Error submitting fund. Please try again.', 'error');
+    }
   };
 
   return (
@@ -141,6 +170,18 @@ const SubmitFundModal = ({ isOpen, onClose, onSubmit }) => {
               placeholder={t('phName')}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-text-muted mb-1">Fund Manager</label>
+            <input
+              type="text"
+              required
+              className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-white text-base focus:border-primary outline-none transition-colors rtl:text-right"
+              placeholder="e.g. CIB, Allianz, etc."
+              value={formData.manager}
+              onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
             />
           </div>
 
